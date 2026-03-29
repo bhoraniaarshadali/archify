@@ -1,13 +1,16 @@
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:flutter/foundation.dart'; // Added for debugPrint
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'dart:convert';
 import 'dart:async';
 
 class AdsVariable {
-  bool isConfigured = false;
+  static bool isConfigured = false;
   bool isSendAppInMaintenance = false;
   bool isShowIAmTester = false;
+  static bool isPurchase = false; // Add static isPurchase for global access
   String selectedCreditPlan = "coins_plan_1";
   String selectedPremiumPlan = "weekly_premium";
   String testEmail = "test@example.com";
@@ -25,9 +28,14 @@ class AdsVariable {
   List<String> reelsUrls = [];
   List<dynamic> interiorStyles = [];
 
-  Future<bool> isInternetConnected() async {
-    var connectivityResult = await (Connectivity().checkConnectivity());
-    return connectivityResult != ConnectivityResult.none;
+  static void resetAdIds() {
+    // Implement reset logic here if needed, for now it's a placeholder as requested
+    debugPrint("AdsVariable: resetAdIds called");
+  }
+
+  static Future<bool> isInternetConnected() async {
+    final List<ConnectivityResult> connectivityResult = await (Connectivity().checkConnectivity());
+    return !connectivityResult.contains(ConnectivityResult.none);
   }
 }
 
@@ -96,7 +104,7 @@ class RemoteConfigController extends GetxController {
   void updateAdsVariable() {
     adsVariable.update((val) {
       if (val != null) {
-        val.isConfigured = true;
+        AdsVariable.isConfigured = true;
         val.isSendAppInMaintenance = _remoteConfig.getBool("isSendAppInMaintenance");
         val.isShowIAmTester = _remoteConfig.getBool("isShowIAmTester");
         val.selectedCreditPlan = _remoteConfig.getString("selectedCreditPlan");

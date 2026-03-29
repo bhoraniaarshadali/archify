@@ -9,6 +9,7 @@ import '../../ads/remote_config_service.dart';
 import '../../services/helper/background_task_service.dart';
 import 'package:get/get.dart';
 import '../../services/remote_config_controller.dart';
+import '../../controllers/splash_screen_controller.dart'; // Import the new controller
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -25,6 +26,8 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
+    // Initialize Fetch Purchase via SplashScreenController
+    Get.put(SplashScreenController());
 
     // Animation for smooth logo entry
     _controller = AnimationController(
@@ -57,6 +60,10 @@ class _SplashScreenState extends State<SplashScreen>
     if (!configController.isInitialized.value) {
       await configController.isInitialized.stream.firstWhere((isReady) => isReady);
     }
+    
+    // Check For Active Subscriptions / Purchase Status
+    final splashController = Get.find<SplashScreenController>();
+    await splashController.fetchPurchase();
 
     final prefs = await SharedPreferences.getInstance();
     final introSeen = prefs.getBool('intro_seen') ?? false;

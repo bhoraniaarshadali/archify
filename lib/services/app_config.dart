@@ -1,20 +1,43 @@
 import 'dart:io';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import '../utils/app_constant.dart';
+import 'premium/store_config.dart';
+import '../core/logger.dart';
+import 'remote_config_controller.dart';
 
 class AppConfig {
+  static void premiumInit() {
+    if (Platform.isIOS || Platform.isMacOS) {
+      StoreConfig(
+        store: Store.appStore, 
+        apiKey: AppConstant.appleApiKey
+      );
+    } else if (Platform.isAndroid) {
+      const useAmazon = bool.fromEnvironment("amazon");
+      StoreConfig(
+        store: useAmazon ? Store.amazon : Store.playStore, 
+        apiKey: useAmazon ? AppConstant.amazonApiKey : AppConstant.googleApiKey
+      );
+    }
+  }
+
   static Future<void> configureSDK() async {
     await Purchases.setLogLevel(LogLevel.debug);
-
-    PurchasesConfiguration? configuration;
-    if (Platform.isAndroid) {
-      configuration = PurchasesConfiguration(AppConstant.googleApiKey);
-    } else if (Platform.isIOS) {
-      configuration = PurchasesConfiguration(AppConstant.appleApiKey);
+    showLog('==========setLogLevel=============');
+    
+    PurchasesConfiguration configuration;
+    if (StoreConfig.isForAmazonAppstore()) {
+      configuration = AmazonConfiguration(StoreConfig.instance.apiKey);
+    } else {
+      configuration = PurchasesConfiguration(StoreConfig.instance.apiKey);
     }
-
-    if (configuration != null) {
-      await Purchases.configure(configuration);
-    }
+    
+    configuration.entitlementVerificationMode = EntitlementVerificationMode.informational;
+    await Purchases.configure(configuration);
+    await Purchases.enableAdServicesAttributionTokenCollection();
+    
+    showLog('==========configure=============');
+    AdsVariable.isConfigured = true;
+    showLog('====configured==${AdsVariable.isConfigured}===========');
   }
 }

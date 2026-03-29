@@ -3,6 +3,7 @@ import 'dart:io';
 class AppConstant {
   static const String googleApiKey = 'goog_HPKOPYmcSujDUgKtzFpydbwzqDF';
   static const String appleApiKey = 'appl_DKdpofXAZNDpdmfsDnnDlcAEOxf';
+  static const String amazonApiKey = 'amazon_placeholder_key'; // Placeholder for amazon
   static const String entitlementKey = "ARDrawProAccess";
 
   static final String weeklyIdentifier = Platform.isAndroid

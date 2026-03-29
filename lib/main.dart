@@ -157,6 +157,7 @@ void main() async {
       // 💎 Initialize GetX Controllers & RevenueCat
       Get.put(CreditController());
       Get.put(RemoteConfigController());
+      AppConfig.premiumInit();
       await AppConfig.configureSDK();
 
       debugPrint('✅ Core services initialized');
