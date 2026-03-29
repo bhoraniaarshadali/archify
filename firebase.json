@@ -1,0 +1,22 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "home-decor-ef8ab",
+          "appId": "1:475315169740:android:86ad6b9ec22fbb00bf1569",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "home-decor-ef8ab",
+          "configurations": {
+            "android": "1:475315169740:android:86ad6b9ec22fbb00bf1569",
+            "ios": "1:475315169740:ios:095e6fc5e214b203bf1569"
+          }
+        }
+      }
+    }
+  }
+}

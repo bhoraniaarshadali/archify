@@ -1,0 +1,39 @@
+Convert the uploaded 2D floor plan into a clean, realistic top-down 3D interior floor plan.
+
+Preserve the exact layout, room sizes, wall positions, doors, windows, and open passages exactly as shown in the input image.
+Any area shown as an open space, doorway, or passage in the input must remain open in the output.
+
+Doorways and openings must be treated as empty gaps in walls.
+If a door opening exists in the input image, it must remain fully open and unobstructed in the output.
+Wall continuity must break exactly where door or passage openings exist.
+Do not close door openings, do not convert doors into walls, and do not block any circulation paths.
+
+BALCONY / VERANDAH RULES:
+Any area marked, labeled, or shaped as a balcony, verandah, terrace, or exterior projection in the input image must remain an exterior or semi-open space.
+Do not convert balcony or verandah areas into interior rooms.
+Balcony areas must not receive interior ceilings or fully enclosed walls.
+Use exterior-style flooring and outdoor lighting for balcony or verandah spaces.
+Maintain clear visual separation between interior rooms and balcony/verandah areas.
+
+Do not add, remove, rotate, shift, or distort any walls, rooms, doors, windows, or openings.
+Treat the input image as a strict architectural blueprint.
+
+Render in a professional architectural visualization style with a true orthographic top-down view only.
+Add realistic flooring, walls, ceilings, and appropriate modern furniture for each room based on its function.
+Use soft natural lighting, subtle shadows, clean materials, and a balanced colorful interior palette.
+Keep proportions accurate, edges sharp, and presentation premium.
+
+TEXT HANDLING RULES:
+- If room names or text labels (e.g., Kitchen, Living Area, Bedroom) are present in the uploaded image, preserve them exactly as they appear.
+- Preserve existing text labels as raster image content.
+- Do not redraw, restyle, reposition, translate, or regenerate text.
+- Do not remove existing text from the input image.
+- Do not add any new text labels that are not present in the uploaded image.
+
+The result must be a visual upgrade only, keeping the original structure completely unchanged.
+
+IMPORTANT:
+Avoid perspective view, angled camera, or isometric view.
+Avoid any layout change, extra rooms, missing walls, blocked openings, or structural modification.
+Avoid removing existing labels or adding new labels.
+Avoid cartoon style, low quality output, blur, distortion, noise, or oversaturated colors.

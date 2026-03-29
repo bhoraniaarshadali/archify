@@ -1,0 +1,29 @@
+{
+  "nativeAd_id": "ca-app-pub-3940256099942544/2247696110",
+  "interstitialAd_id": "11",
+  "interstialID": "ca-app-pub-3940256099942544/1033173712",
+  "rewardAd_id": "ca-app-pub-3940256099942544/5224354917",
+
+  "kie_api_key": "0181891dbdeec12a3b885dcbed0c68c2",
+  "kie_api_key_interior": "0181891dbdeec12a3b885dcbed0c68c2",
+  "kie_api_key_exterior": "0181891dbdeec12a3b885dcbed0c68c2",
+  "kie_api_key_garden": "0181891dbdeec12a3b885dcbed0c68c2",
+  "kie_api_key_chatbot": "0181891dbdeec12a3b885dcbed0c68c2",
+  "kie_api_key_object_remove": "0181891dbdeec12a3b885dcbed0c68c2",
+  "kie_api_key_object_replace": "0181891dbdeec12a3b885dcbed0c68c2",
+  "kie_api_key_object_2d_to_3d": "0181891dbdeec12a3b885dcbed0c68c2",
+
+  "apifree_key": "sk-pZrwD1bzSFYX9z4P3fBfEcYzji2db",
+  "apifree_key_interior": "0181891dbdeec12a3b885dcbed0c68c2",
+  "apifree_key_exterior": "0181891dbdeec12a3b885dcbed0c68c2",
+  "apifree_key_garden": "0181891dbdeec12a3b885dcbed0c68c2",
+  "apifree_key_chatbot": "0181891dbdeec12a3b885dcbed0c68c2",
+  "apifree_key_object_remove": "0181891dbdeec12a3b885dcbed0c68c2",
+  "apifree_key_object_replace": "0181891dbdeec12a3b885dcbed0c68c2",
+  "apifree_key_object_2d_to_3d": "0181891dbdeec12a3b885dcbed0c68c2",
+
+  "daily_credit": 10,
+  "interior_provider_selection": "apifree",
+  "interstitial_frequency": 1,
+  "maintenance_mode": "off"
+}

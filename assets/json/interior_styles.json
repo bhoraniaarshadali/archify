@@ -1,0 +1,410 @@
+[
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/warm-minimalism.webp",
+    "type": "interior",
+    "template_id": "interior0001",
+    "style_name": "Warm Minimalism Style",
+    "prompt_og": "Warm Minimalism is the antidote to cold, sterile minimalism. It keeps the “less but better” discipline, but swaps harsh whites and glossy surfaces for softer neutrals, tactile fabrics, and natural materials that feel lived-in. Think creamy off-whites, sand and oatmeal tones, light oak or ash wood, linen curtains, wool rugs, and gentle matte finishes that photograph beautifully without looking like a showroom. The goal is visual calm with human comfort: fewer objects, but each one chosen for warmth, proportion, and function. In a living room, this might mean a low-profile sofa in textured fabric, a simple wood coffee table, and one sculptural lamp instead of many small accessories. Storage is part of the aesthetic—closed cabinetry, hidden cables, and clear surfaces reduce visual noise. Layered lighting is essential: a soft ceiling glow, a floor lamp for depth, and a warm bedside or task light create a cozy mood at night. Done well, Warm Minimalism makes small apartments feel bigger and busy homes feel calmer.",
+    "prompt": "Warm Minimalism is the antidote to cold, sterile minimalism. It keeps the “less but better” discipline, but swaps harsh surfaces for softer neutrals, tactile fabrics, and natural materials that feel lived-in. Think light wood, linen curtains, wool rugs, and gentle matte finishes that photograph beautifully without looking like a showroom. The goal is visual calm with human comfort: fewer objects, but each one chosen for warmth, proportion, and function. In a living room, this might mean a low-profile sofa in textured fabric, a simple wood coffee table, and one sculptural lamp instead of many small accessories. Storage is part of the aesthetic—closed cabinetry, hidden cables, and clear surfaces reduce visual noise. Layered lighting is essential: a soft ceiling glow, a floor lamp for depth, and a bedside or task light create a cozy mood at night. Done well, Warm Minimalism makes small apartments feel bigger and busy homes feel calmer."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/modern-contemporary.webp",
+    "type": "interior",
+    "template_id": "interior0002",
+    "style_name": "Modern Contemporary Style",
+    "prompt": "Modern Contemporary interior design is a current, flexible style defined less by one historic era and more by a “right now” sensibility. It favors clean geometry, open circulation, and a curated mix of materials—wood, stone, glass, metal—used in a balanced, intentional way. Unlike strict minimalism, it welcomes a few statement moments: a sculptural pendant, a bold piece of art, a textured feature wall, or a sofa with strong proportions. The palette often starts neutral (warm whites, greige, charcoal) and adds contrast through black accents, brushed brass, or deep colors like forest green or navy. Comfort matters: contemporary spaces use plush but streamlined seating, large rugs, and layered textiles that keep the room from feeling echoey or empty. Storage and built-ins help maintain a clean look while still supporting real life. In kitchens, expect flat-panel cabinetry, integrated handles, and simple hardware; in living rooms, you’ll see low media units, minimal clutter, and lighting that mixes recessed, wall, and accent sources. The end result is polished, practical, and easy to update as trends evolve."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/bright-scandinavian.webp",
+    "type": "interior",
+    "template_id": "interior0003",
+    "style_name": "Scandinavian Style",
+    "prompt": "Bright Scandinavian style is built for short winter days and long summer light: it maximizes brightness, clarity, and comfort. The foundation is usually a light, reflective palette—soft whites, pale gray, and warm beige—paired with blond woods like birch and pine. Furniture stays simple and functional with tapered legs, clean silhouettes, and excellent everyday usability. What makes it feel welcoming is hygge: cozy layers such as chunky knits, wool throws, natural fiber rugs, and candles or warm lamps that soften shadows. Patterns appear sparingly, often in subtle stripes, small checks, or graphic black-and-white accents. Plants and natural materials provide life without visual chaos. In practical terms, this style loves smart storage, uncluttered surfaces, and well-defined zones, especially in small apartments. Lighting is a big deal: globe pendants, floor lamps, and diffuse bulbs create an even glow rather than harsh hotspots. Bright Scandinavian works because it’s repeatable: once you set the palette and wood tone, the rest is about clean function plus soft texture."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/natural-japandi.webp",
+    "type": "interior",
+    "template_id": "interior0004",
+    "style_name": "Natural Japandi Style",
+    "prompt": "Natural Japandi is a quiet power move: it blends Japanese restraint with Scandinavian warmth into interiors that feel calm, airy, and deeply intentional. The color palette is subdued—warm whites, clay, taupe, muted greens—supported by natural wood, stone, linen, and handmade ceramics. Furniture tends to be low, with clean joinery and simple forms that emphasize proportion over decoration. Negative space is not “empty”; it’s designed breathing room that makes a room feel expensive and peaceful. Where pure minimalism can feel strict, Japandi adds softness through texture: slubby linen, boucle, woven shades, and subtle grain in timber. Clutter is the enemy, so closed storage and carefully chosen objects matter. A typical Japandi living room might include a low sofa, a simple coffee table, a paper lantern-inspired pendant, and one or two sculptural vases or branches—nothing more. Lighting is warm and indirect, with a focus on gentle glow. Natural Japandi fits modern homes because it’s practical: it reduces decision fatigue, photographs cleanly, and stays timeless when trends shift."
+  },
+
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/soft-industrial.webp",
+    "type": "interior",
+    "template_id": "interior0005",
+    "style_name": "Soft Industrial Style",
+    "prompt": "Soft Industrial interior design style featuring a signature mix of exposed red brick walls and matte black metal pipe fixtures. The aesthetic combines raw architectural structure with cozy residential warmth, utilizing a color palette of charcoal grey textiles, warm oak wood, and tan leather accents. The lighting is warm and ambient with industrial Edison bulbs. The space includes details like wire mesh accents, indoor snake plants, and black-and-white typography art. High resolution, photorealistic, 8k, cozy loft atmosphere."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/natural-boho-chic.avif",
+    "type": "interior",
+    "template_id": "interior0006",
+    "style_name": "Natural Boho Chic Style",
+    "prompt": "Natural Boho Chic is relaxed, textured, and slightly nomadic—without tipping into chaos. The “natural” version focuses on earthy neutrals and honest materials: rattan, cane, jute, linen, raw wood, clay pottery, and plenty of greenery. Instead of loud color everywhere, it leans into sand, terracotta, cream, caramel, and muted olive, letting texture do the visual work. The signature look is layered: a flatweave rug under a softer rug, mixed pillows with subtle patterns, woven baskets for storage, and a curated set of handmade accents like macramé, ceramics, or carved wood. The chic part is editing—choosing a consistent palette and repeating a few shapes so the room feels styled rather than cluttered. Lighting is warm and soft, often through woven pendants that cast gentle shadows. This style shines in bedrooms and living rooms where comfort is the priority. Natural Boho Chic makes a space feel personal, creative, and inviting—like it has stories, not just furniture."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/modern-coastal.avif",
+    "type": "interior",
+    "template_id": "interior0007",
+    "style_name": "Modern Coastal Style",
+    "prompt": "Modern Coastal takes the breezy, beach-inspired feeling of coastal decor and updates it with cleaner lines and a more sophisticated palette. Instead of overly themed “nautical” props, it uses light, sun-washed neutrals—white, sand, soft gray—plus airy textiles like linen and cotton. Wood tones are typically pale oak or whitewashed finishes, while accents might include natural stone, rattan, and subtle ocean hues like dusty blue or seafoam green. The modern part is restraint: fewer decorative items, more negative space, and furniture with simple silhouettes. You’ll often see slipcovered sofas, wide-plank floors, and large rugs that ground the room without visual heaviness. Light is a feature—sheer curtains, reflective surfaces, and layered lighting keep the space bright even indoors. This style works well for apartments too, not just beach houses: the trick is to prioritize breathable materials and a calm palette that suggests the coast without shouting it. Modern Coastal feels open, clean, and vacation-like, but still polished enough for everyday life."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/christmas.avif",
+    "type": "interior",
+    "template_id": "interior0008",
+    "style_name": "Christmas Style",
+    "prompt": "Christmas interior styling is a seasonal aesthetic that transforms a home using warmth, sparkle, and tradition—without overwhelming the space. The most successful Christmas rooms start with a consistent color story: classic red and green, elegant gold and ivory, modern monochrome, or rustic natural tones with wood and greenery. Evergreen elements are the backbone—tree, garlands, wreaths—supported by warm lighting (fairy lights, candles, soft lamps) that makes evenings feel magical. Texture does heavy lifting: velvet ribbons, knit throws, faux fur pillows, and natural materials like pinecones or dried oranges add depth and photograph well. For a modern look, keep surfaces clear and concentrate decor in a few zones: the tree corner, a mantel or shelf, and a dining table centerpiece. This prevents visual clutter while keeping the holiday “signal” strong. In small apartments, wall or tabletop trees, slim trees, and minimal ornaments maintain the festive feel. The result should feel cozy, inviting, and unmistakably seasonal—like the room is ready for music, food, and people."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/contemporary-mediterranean.avif",
+    "type": "interior",
+    "template_id": "interior0009",
+    "style_name": "Contemporary Mediterranean Style",
+    "prompt": "Contemporary Mediterranean style reinterprets classic coastal architecture—white plaster walls, arches, stone, and ceramics—through a modern, cleaner lens. The vibe is sunlit and grounded: limewash or plaster-like finishes create soft, imperfect surfaces that feel warm in photos, while natural stone, terracotta, and wood add weight and authenticity. Colors are earthy and calm: chalky whites, sand, clay, olive, and muted blue, used sparingly so the space feels airy rather than busy. Arched doorways, curved niches, and organic silhouettes give the style its signature architecture, but contemporary versions keep ornament minimal and lines more refined. Textiles are breathable: linen curtains, cotton upholstery, woven rugs, and natural fibers that suggest summer without needing themed decor. In kitchens, you’ll see simple fronts, stone counters, and handcrafted tile as an accent rather than everywhere. Lighting leans warm and sculptural—plaster pendants, lantern-like fixtures, and indirect glow. Done well, Contemporary Mediterranean feels like a boutique villa—relaxed, bright, and timeless."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/updated-classic.avif",
+    "type": "interior",
+    "template_id": "interior0010",
+    "style_name": "Updated Classic Style",
+    "prompt": "Updated Classic is where timeless architecture meets modern comfort. It keeps the elegance of classic interiors—symmetry, moldings, refined proportions, and quality materials—but updates the look with simpler furniture lines, lighter palettes, and contemporary lighting. The foundation often includes wall paneling, crown molding, or classic trim details, paired with neutral colors like warm white, stone, taupe, and soft gray. Instead of heavy, ornate furniture everywhere, Updated Classic uses fewer statement pieces with clean silhouettes: a tailored sofa, a sculptural armchair, a modern chandelier, and art that feels current. Metals trend toward brushed brass, antique bronze, or black accents used sparingly for contrast. Textiles matter: linen drapery, wool rugs, and layered cushions add comfort without visual clutter. The key is balance—honor the room’s historic cues, then simplify the decor so it feels fresh, not museum-like. This style works across apartments and houses because it reads “expensive” through proportion and restraint, not through excess."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/balanced-transitional.avif",
+    "type": "interior",
+    "template_id": "interior0011",
+    "style_name": "Balanced Transitional Style",
+    "prompt": "Balanced Transitional design lives in the sweet spot between traditional and modern interiors. It avoids extremes, combining classic proportions and familiar forms with simplified lines and contemporary finishes. The result is a space that feels timeless, comfortable, and broadly appealing—ideal for family homes and long-term living. Color palettes are usually neutral and calming, built from warm whites, taupe, soft gray, and muted blues or greens. Furniture mixes influences: a classic sofa silhouette upholstered in a modern fabric, traditional wood furniture paired with clean-lined lighting, or antique-inspired pieces balanced by minimal decor. Symmetry plays a subtle role, helping rooms feel organized without looking formal. Textures add depth—linen, wool, leather, and wood—while patterns are restrained and often tonal. Lighting is updated and practical, favoring simple chandeliers, table lamps, and wall sconces over ornate fixtures. Storage and layout prioritize real-life functionality. Balanced Transitional works because it rarely dates quickly and adapts easily as tastes evolve."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/gothic.avif",
+    "type": "interior",
+    "template_id": "interior0012",
+    "style_name": "Gothic Style",
+    "prompt": "Gothic interior style is dramatic, historic, and emotionally intense. Rooted in medieval architecture, it draws inspiration from cathedrals, castles, and monasteries, translating their atmosphere into interiors. Key elements include pointed arches, heavy wood furniture, carved details, and a strong vertical emphasis. The palette is dark and rich—deep burgundy, charcoal, forest green, midnight blue—often contrasted with stone tones or muted metallic accents. Lighting is intentionally moody: candle-like fixtures, wrought iron chandeliers, and soft pools of light that create shadows rather than eliminate them. Textiles are heavy and tactile, such as velvet, brocade, leather, and tapestries. In contemporary interpretations, Gothic is often softened by cleaner layouts and selective use of elements, avoiding visual overload. Gothic spaces are not about brightness or minimalism; they are about atmosphere, storytelling, and a sense of timeless gravity."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/snow-chalet.avif",
+    "type": "interior",
+    "template_id": "interior0013",
+    "style_name": "Snow Chalet Style",
+    "prompt": "Snow Chalet style is inspired by alpine cabins and mountain lodges designed to provide warmth and comfort in cold climates. It emphasizes coziness, durability, and a strong connection to nature. Wood is the dominant material—often in darker or honey-toned finishes—used on walls, ceilings, floors, and furniture. Stone fireplaces act as visual anchors and gathering points. The palette is warm and natural: browns, creams, deep reds, forest greens, and charcoal accents. Furniture is sturdy and inviting, with generous proportions and plush upholstery. Textiles are layered generously—wool blankets, faux fur throws, thick rugs—to insulate both physically and visually. Lighting is soft and amber-toned, avoiding harsh brightness in favor of intimate pools of light. Modern Snow Chalet interiors may simplify forms and add contemporary lighting, but the emotional goal remains the same: refuge and warmth."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/contemporary-mid-century.avif",
+    "type": "interior",
+    "template_id": "interior0014",
+    "style_name": "Contemporary Mid-Century Style",
+    "prompt": "Contemporary Mid-Century design updates the iconic Mid-Century Modern aesthetic for modern living. It keeps the recognizable elements—clean lines, organic curves, tapered legs, and functional forms—while adapting materials, colors, and layouts to current expectations of comfort. Wood tones like teak and walnut are common, paired with neutral upholstery and occasional bold accents. Furniture feels light and elevated, allowing rooms to breathe. Patterns are geometric but controlled, often appearing in rugs or cushions rather than dominating the space. Lighting includes iconic silhouettes updated with modern technology. Storage is practical and minimal, reflecting the original movement’s focus on function. This style works because it’s instantly recognizable yet endlessly adaptable."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/wabi-sabi.avif",
+    "type": "interior",
+    "template_id": "interior0015",
+    "style_name": "Wabi-Sabi Style",
+    "prompt": "Wabi-Sabi is a Japanese philosophy translated into interior design, centered on imperfection, impermanence, and authenticity. Rather than polished perfection, it values natural aging, irregular forms, and subtle textures. Colors are muted and earthy: clay, stone, soft gray, warm white, and natural wood. Furniture is simple and often low, with visible grain, knots, or handmade qualities. Objects are few, chosen for meaning rather than decoration. Cracks, patina, and asymmetry are embraced rather than hidden. Lighting is soft and indirect, creating calm rather than brightness. Wabi-Sabi interiors feel quiet, grounded, and deeply human."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/natural-tropical.webp",
+    "type": "interior",
+    "template_id": "interior0016",
+    "style_name": "Natural Tropical Style",
+    "prompt": "Natural Tropical interiors bring the outdoors in through vegetation, airflow, and organic materials. Unlike colorful resort styles, this approach is grounded and calm, relying on greens, warm woods, and breathable textures. Large plants, natural light, and open layouts define the mood. Furniture is casual and low-profile, often made of wood or woven fibers. Textiles are light and natural. A well-executed Natural Tropical room avoids “theme” decor and instead creates a microclimate: filtered sunlight, soft shadows, and a sense of ease. Use layered greenery (floor plants, shelf plants, hanging vines) and pair it with natural finishes such as teak, bamboo, rattan, linen, and stone. The palette can include sand tones and clay, with accents in muted sea-green rather than loud primary colors. Ventilation and layout matter as much as objects: keep circulation open, avoid heavy curtains, and choose furniture that doesn’t block light. The goal is a space that feels fresh, breathable, and quietly exotic without looking staged."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/modern-farmhouse.avif",
+    "type": "interior",
+    "template_id": "interior0017",
+    "style_name": "Modern Farmhouse Style",
+    "prompt": "Modern Farmhouse blends rustic comfort with clean, modern structure. It borrows the warmth of traditional farmhouse living—wood textures, practical furniture, and a welcoming feel—but updates it with simpler shapes, a calmer palette, and more modern contrast. White and warm neutral walls are common, paired with natural or reclaimed wood and matte black accents that sharpen the look. The best spaces feel cozy but not cluttered: open shelving is balanced with closed storage, and decor is edited to a few high-impact elements (a large pendant, a statement table, a vintage rug). Textiles are comfortable and durable—cotton, linen, wool—and finishes tend toward matte rather than glossy. Kitchens often feature shaker-style cabinetry, apron-front sinks, and straightforward hardware, sometimes with modern lighting or stone counters. The overall effect is familiar and warm, but clearly contemporary and easy to maintain."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/vintage-modern.avif",
+    "type": "interior",
+    "template_id": "interior0018",
+    "style_name": "Vintage Modern Style",
+    "prompt": "Vintage Modern is about contrast with control: a contemporary foundation layered with curated pieces from the past. The space should feel collected over time, not themed or costume-like. Start with a modern base—clean walls, simple large furniture, and a restrained palette—then add vintage elements that bring personality: a retro credenza, a mid-century chair, an antique mirror, or a patterned rug with history. The trick is coherence: repeat one or two finishes (wood tone, metal finish), and keep a consistent color story so different eras don’t fight. Vintage pieces work best when they are functional and high-quality, not just decorative clutter. Modern lighting and minimal window treatments help keep the room fresh. Styling should be edited: let a few standout objects breathe rather than filling every surface. Done well, Vintage Modern feels unique, personal, and design-forward without looking chaotic."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/balanced-eclectic.avif",
+    "type": "interior",
+    "template_id": "interior0019",
+    "style_name": "Balanced Eclectic Style",
+    "prompt": "Balanced Eclectic design mixes styles, but it does it with rules—otherwise it becomes clutter. The core idea is harmony through repetition: repeat a palette, repeat materials, and repeat shapes so the eye reads unity even when furniture comes from different worlds. A balanced eclectic living room might combine a modern sofa, a vintage coffee table, and a classic rug, but everything shares a consistent color story (for example warm neutrals with black accents) and a limited set of textures (wood + linen + one metal finish). Artwork is often a focal point, but it’s curated rather than random. Styling is intentional: objects are grouped, negative space is preserved, and the room has a clear “hero” piece. Lighting helps unify the scene—matching lampshades or coordinated finishes can tie everything together. Balanced Eclectic is ideal for people who love variety but still want a polished, designer look."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/compact-urban.avif",
+    "type": "interior",
+    "template_id": "interior0020",
+    "style_name": "Compact Urban Style",
+    "prompt": "Compact Urban style is designed for small city spaces where every square meter must work. The aesthetic is clean and efficient: smart storage, multi-use furniture, and layouts that maximize circulation. A compact urban room often uses a light or neutral palette to expand the perceived space, then adds contrast with a few dark accents or one bold element. Furniture is chosen for function—sofa beds, nesting tables, extendable dining tables, and vertical shelving. Closed storage reduces visual noise, while open shelves are used selectively for curated items. Lighting is practical and layered: ceiling light for general use, task lighting for work, and warm accent lamps for evenings. Materials tend to be durable and easy-care, reflecting real city living. Compact Urban is not about being minimal for aesthetic purity; it’s about making a space feel bigger, easier, and calmer to live in."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/luxury.avif",
+    "type": "interior",
+    "template_id": "interior0021",
+    "style_name": "Luxury Style",
+    "prompt": "Luxury interior design is defined by quality, proportion, and attention to detail rather than excess. True luxury spaces feel composed and intentional, using premium materials such as natural stone, marble, solid wood, leather, and metal finishes applied with restraint. The palette often stays neutral—ivory, taupe, warm gray—allowing texture and craftsmanship to take center stage. Furniture is frequently custom or tailored, designed to fit the room perfectly rather than fill it. Lighting plays a crucial role: layered schemes combine architectural lighting, sculptural fixtures, and subtle accent lights to create depth and drama. Surfaces are clean, clutter is minimal, and every object earns its place. Modern luxury avoids ostentation, focusing instead on calm, comfort, and a sense of permanence. When done well, luxury feels effortless and timeless rather than flashy."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/cozy-airbnb.avif",
+    "type": "interior",
+    "template_id": "interior0022",
+    "style_name": "Cozy Airbnb Style",
+    "prompt": "Cozy Airbnb style is designed to appeal instantly and photograph well while remaining durable and easy to maintain. The goal is comfort, warmth, and neutrality so guests of all backgrounds feel welcome. Soft color palettes—warm whites, beige, light gray—create a calm base, while texture adds interest through throws, cushions, and rugs. Furniture is comfortable and practical rather than trendy, prioritizing good mattresses, generous seating, and intuitive layouts. Lighting is warm and layered to avoid harsh shadows. Decor is friendly and restrained: artwork, mirrors, and plants add life without clutter. Storage is clear and functional, helping guests feel at home quickly."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/simple.avif",
+    "type": "interior",
+    "template_id": "interior0023",
+    "style_name": "Simple Style",
+    "prompt": "Simple interior design focuses on clarity, function, and ease. It removes unnecessary elements and keeps only what is useful or meaningful. The palette is usually neutral and light, furniture is straightforward, and layouts are intuitive. Simplicity does not mean empty or cold; warmth comes from proportion, light, and a few well-chosen textures."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/traditional.avif",
+    "type": "interior",
+    "template_id": "interior0024",
+    "style_name": "Traditional Style",
+    "prompt": "Traditional interiors are rooted in classic European and American design, emphasizing symmetry, craftsmanship, and familiarity. Rich wood furniture, layered textiles, and balanced compositions create a sense of comfort and formality. Color palettes often include warm neutrals with deeper accents."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/art-deco.avif",
+    "type": "interior",
+    "template_id": "interior0025",
+    "style_name": "Art Deco Style",
+    "prompt": "Art Deco interiors are bold, glamorous, and geometric. Originating in the early 20th century, the style uses strong symmetry, luxurious materials, and high contrast. Common elements include brass, marble, velvet, mirrored surfaces, and graphic patterns."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/industrial.avif",
+    "type": "interior",
+    "template_id": "interior0026",
+    "style_name": "Industrial Style",
+    "prompt": "Industrial style is inspired by factories and warehouses, celebrating raw materials and utilitarian forms. Exposed brick, concrete, steel, and open layouts define the look."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/parisian.avif",
+    "type": "interior",
+    "template_id": "interior0027",
+    "style_name": "Parisian Style",
+    "prompt": "Parisian interiors combine historic architecture with effortless elegance. Moldings, herringbone floors, and refined neutrals are balanced with modern furniture and art."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/modern-rustic.avif",
+    "type": "interior",
+    "template_id": "interior0028",
+    "style_name": "Modern Rustic Style",
+    "prompt": "Modern Rustic blends natural textures with contemporary simplicity. Wood, stone, and raw finishes are balanced by clean lines and open layouts."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/japanese-design.avif",
+    "type": "interior",
+    "template_id": "interior0029",
+    "style_name": "Japanese Design Style",
+    "prompt": "Japanese Design emphasizes order, balance, and connection to nature. Low furniture, natural materials, and simplicity define the style."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/hollywood-glam.avif",
+    "type": "interior",
+    "template_id": "interior0030",
+    "style_name": "Hollywood Glam Style",
+    "prompt": "Hollywood Glam is luxurious, dramatic, and inspired by classic cinema. Plush fabrics, metallic finishes, mirrors, and bold lighting create a glamorous atmosphere."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/bali.avif",
+    "type": "interior",
+    "template_id": "interior0031",
+    "style_name": "Bali Style",
+    "prompt": "Bali interior design is rooted in a strong connection between indoor spaces and nature. Inspired by traditional Balinese architecture, it emphasizes openness, natural materials, and a calm, resort-like atmosphere. Wood—especially teak—is dominant, paired with stone, bamboo, rattan, and handcrafted details. Spaces are often visually open, allowing air and light to circulate freely. The color palette stays warm and earthy: sand, brown, off-white, and green, sometimes accented with darker carved wood. Furniture is low and relaxed, encouraging rest and contemplation. Decorative elements are minimal but meaningful, often handmade or inspired by local craftsmanship. Lighting is soft and indirect, reinforcing a tranquil mood rather than dramatic contrast. Bali interiors aim to feel restorative, calm, and deeply connected to nature."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/gaming-room.avif",
+    "type": "interior",
+    "template_id": "interior0032",
+    "style_name": "Gaming Room Style",
+    "prompt": "A Gaming Room is a functional, technology-driven space designed for immersion and comfort. Ergonomics are central: proper desk height, supportive seating, and screen positioning reduce fatigue during long sessions. Lighting is often customizable, with RGB strips or accent lights used to create mood without interfering with visibility. Dark or neutral bases help control reflections, while acoustic panels improve sound quality. Cable management is essential to maintain a clean look. Furniture is modular and practical, often designed specifically for gaming or streaming setups. A well-designed gaming room balances performance, comfort, and visual impact."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/futuristic.avif",
+    "type": "interior",
+    "template_id": "interior0033",
+    "style_name": "Futuristic Style",
+    "prompt": "Futuristic interior design explores innovation, fluid forms, and advanced materials. Surfaces are sleek, often glossy or metallic, with integrated lighting and minimal visible hardware. Curves replace straight lines, creating a sense of motion and continuity. Color palettes are restrained—white, silver, black—sometimes accented with neon or LED lighting. Furniture feels sculptural and often built-in. Technology is seamlessly integrated rather than displayed. The aim is to suggest what living might look like tomorrow."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/neoclassical.avif",
+    "type": "interior",
+    "template_id": "interior0034",
+    "style_name": "Neoclassical Style",
+    "prompt": "Neoclassical interiors reinterpret classical Greek and Roman principles with restraint and balance. Symmetry, proportion, and architectural detail define the style. Moldings, columns, and refined ornamentation appear in controlled ways, paired with neutral palettes and contemporary comfort."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/biophilic.avif",
+    "type": "interior",
+    "template_id": "interior0035",
+    "style_name": "Biophilic Style",
+    "prompt": "Biophilic design strengthens the human connection to nature within interior spaces. It integrates plants, natural light, organic materials, and views of nature to improve well-being. Layouts prioritize airflow and daylight, while textures like wood and stone dominate."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/zen.avif",
+    "type": "interior",
+    "template_id": "interior0036",
+    "style_name": "Zen Style",
+    "prompt": "Zen interiors focus on calm, balance, and reduction. Inspired by Japanese philosophy, the style uses minimal objects, soft neutrals, and natural textures. Spaces are uncluttered and intentional."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/eco-friendly.avif",
+    "type": "interior",
+    "template_id": "interior0037",
+    "style_name": "Eco-Friendly Style",
+    "prompt": "Eco-Friendly interiors prioritize sustainability, durability, and responsible material choices. Recycled, reclaimed, and low-impact materials are favored. Energy-efficient lighting and long-lasting furniture define the approach."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/french-classic.avif",
+    "type": "interior",
+    "template_id": "interior0038",
+    "style_name": "French Classic Style",
+    "prompt": "French Classic interiors are elegant and refined, combining ornate detailing with soft palettes. Moldings, curved furniture, and antique-inspired pieces define the style."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/french-country.avif",
+    "type": "interior",
+    "template_id": "interior0039",
+    "style_name": "French Country Style",
+    "prompt": "French Country style blends rustic charm with classic French elegance. Weathered wood, soft colors, and comfortable furniture define the look."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/retro.avif",
+    "type": "interior",
+    "template_id": "interior0040",
+    "style_name": "Retro Style",
+    "prompt": "Retro interiors draw inspiration from mid-to-late 20th century design, celebrating color, pattern, and nostalgia. Furniture silhouettes and graphic motifs define the look."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/art-nouveau.avif",
+    "type": "interior",
+    "template_id": "interior0041",
+    "style_name": "Art Nouveau Style",
+    "prompt": "Art Nouveau interiors are defined by fluid lines, organic forms, and a strong connection to nature. Emerging at the turn of the 20th century, the style rejected industrial rigidity in favor of handcrafted beauty and decorative unity. Interiors often feature flowing curves, floral and botanical motifs, stained glass, and intricate metalwork. Wood is carved rather than flat, and furniture feels sculptural instead of purely functional. Color palettes are soft but expressive—sage green, muted gold, dusty blue, warm cream—often inspired by plants and natural light. Walls, lighting, furniture, and decorative objects are designed as a cohesive whole, rather than independent pieces. In modern interpretations, Art Nouveau is usually distilled: one or two sinuous elements, a statement lamp, or a decorative panel bring the spirit without overwhelming the space."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/brazilian.avif",
+    "type": "interior",
+    "template_id": "interior0042",
+    "style_name": "Brazilian Style",
+    "prompt": "Brazilian interior style blends modernism with tropical warmth and a strong indoor–outdoor connection. Influenced by Brazilian modern architecture, it favors open layouts, natural ventilation, and abundant light. Materials are tactile and honest: warm woods, stone, concrete, leather, and woven fibers. Furniture often has bold yet simple forms, with an emphasis on comfort and craftsmanship. Color palettes balance neutrals with saturated accents—terracotta, green, mustard, deep blue—used sparingly. Plants are integral, reinforcing the biophilic feel. The style feels relaxed but confident, modern yet rooted in place."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/shabby-chic.avif",
+    "type": "interior",
+    "template_id": "interior0043",
+    "style_name": "Shabby Chic Style",
+    "prompt": "Shabby Chic interiors embrace softness, romance, and a gently aged aesthetic. The style favors distressed finishes, pastel tones, and vintage-inspired furniture that feels collected and comfortable. Whites, blush, lavender, and faded blues dominate the palette, often paired with floral patterns and light wood. Furniture shows wear intentionally—chipped paint, curved legs, and ornate detailing softened by time. Textiles are key: lace, linen, cotton, and ruffles add delicacy. The challenge is balance—too much becomes cluttered, so successful Shabby Chic edits carefully and keeps the base light."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/maximalist.avif",
+    "type": "interior",
+    "template_id": "interior0044",
+    "style_name": "Maximalist Style",
+    "prompt": "Maximalist interiors celebrate abundance, personality, and expressive layering. Instead of restraint, the style embraces bold color, pattern mixing, art-filled walls, and rich textures. The key is intention: successful maximalism uses repetition and scale to avoid chaos. Color palettes can be vibrant or deep, often layered room-wide. Furniture and decor reflect personal taste—books, art, travel objects—displayed proudly. Lighting supports drama with statement fixtures and warm pools of light."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/cyberpunk.avif",
+    "type": "interior",
+    "template_id": "interior0045",
+    "style_name": "Cyberpunk Style",
+    "prompt": "Cyberpunk interiors draw inspiration from sci-fi dystopias and high-tech urban futures. The style is dark, saturated, and neon-lit, combining industrial textures with digital aesthetics. Concrete, metal, glass, and synthetic materials dominate. Lighting defines the mood: neon signs, LED strips, and high-contrast accents in magenta, cyan, and electric blue. Furniture is minimal and functional, often modular, allowing the lighting and atmosphere to take center stage."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/retro-futuristic.avif",
+    "type": "interior",
+    "template_id": "interior0046",
+    "style_name": "Retro-Futuristic Style",
+    "prompt": "Retro-Futuristic interiors imagine how past decades envisioned the future. Smooth curves, chrome accents, glossy finishes, and space-age silhouettes define the style. Whites and silvers dominate, with pops of bold color. Furniture feels playful and experimental."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/nautical.avif",
+    "type": "interior",
+    "template_id": "interior0047",
+    "style_name": "Nautical Style",
+    "prompt": "Nautical interiors are inspired by the sea, using crisp palettes and maritime references. Navy, white, and natural textures dominate. Rope details, stripes, and brass accents are common but best used subtly."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/cottagecore.avif",
+    "type": "interior",
+    "template_id": "interior0048",
+    "style_name": "Cottagecore Style",
+    "prompt": "Cottagecore celebrates rural nostalgia, simplicity, and handmade charm. Floral prints, soft colors, and cozy layers define the look. It romanticizes slow living and nature."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/surf-shack.avif",
+    "type": "interior",
+    "template_id": "interior0049",
+    "style_name": "Surf Shack Style",
+    "prompt": "Surf Shack interiors are casual, sun-washed, and carefree. Inspired by beach huts and surf culture, the style favors relaxed furniture, faded colors, and natural textures."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/baroque.avif",
+    "type": "interior",
+    "template_id": "interior0050",
+    "style_name": "Baroque Style",
+    "prompt": "Baroque interiors are dramatic, ornate, and theatrical. Originating in Europe, the style emphasizes grandeur through curves, rich materials, and intense contrast. Gold, marble, carved wood, and heavy textiles define the look."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/soviet.avif",
+    "type": "interior",
+    "template_id": "interior0051",
+    "style_name": "Soviet Style",
+    "prompt": "Soviet-inspired interiors draw from the aesthetics of Eastern Bloc modernism: utilitarian design, robust materials, and a sober, graphic mood. The style often references Brutalism and Soviet-era apartments, where practicality drove form. Expect concrete textures, raw plaster, dark woods, simple metalwork, and functional furniture with clean, sometimes boxy silhouettes. Color palettes tend to be muted—gray, beige, olive, tobacco brown—punctuated by strong accents like red, black, or propaganda-style graphics used sparingly. Lighting is purposeful and can feel industrial: exposed bulbs, simple pendants, and wall-mounted fixtures with minimal ornament. In a modern reinterpretation, Soviet style becomes more curated: fewer objects, better materials, and deliberate negative space. Vintage pieces—metal stools, factory lamps, archival posters—can add authenticity, but editing is critical to avoid clutter or kitsch. The result feels grounded, structured, and intellectually “austere,” ideal for people who like design with history and grit."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/vaporwave.avif",
+    "type": "interior",
+    "template_id": "interior0052",
+    "style_name": "Vaporwave Style",
+    "prompt": "Vaporwave interiors translate an internet-born aesthetic into physical space: nostalgic, surreal, and neon-soft. Inspired by 80s/90s consumer culture, early digital graphics, and dreamy mall vibes, the style uses pastel gradients, glossy surfaces, and playful retro tech references. Typical colors include lavender, pink, aqua, mint, and soft peach, often paired with chrome accents or translucent acrylic. Lighting is essential: LED strips, neon signs, and colored lamps create a hazy, synthetic glow. Decor can include retro computers, cassette-era shapes, grid patterns, and bold typography—ideally used in curated doses so the room doesn’t feel like a costume. Furniture works best when it’s simple and geometric, letting color and light do the expressive work. In a modern home, Vaporwave is often applied as an accent room (studio, gaming area) or through a few signature elements: one neon piece, one gradient artwork, and cohesive lighting."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/hot-pink.avif",
+    "type": "interior",
+    "template_id": "interior0053",
+    "style_name": "Hot Pink Style",
+    "prompt": "Hot Pink style is a bold, high-impact interior direction built around one dominant color: saturated pink used unapologetically. The aesthetic can swing playful, glamorous, or modern-art depending on the supporting materials. A successful Hot Pink room balances intensity with structure: keep large surfaces coordinated (walls, key furniture) and use neutrals—white, black, warm beige—or metallics to prevent visual overload. Texture matters: velvet, lacquer, glossy tile, and soft rugs change how pink reads under light. Lighting should be warm and flattering; harsh cool light can make pink feel cheap or aggressive. Pattern is optional but works best in controlled doses—stripes, checkerboards, or pop-art graphics. In a contemporary approach, Hot Pink pairs well with clean silhouettes, minimal clutter, and a few sculptural accents. The goal is intentional drama: confident, energetic, and surprisingly livable when edited well."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/post-apocalyptic.avif",
+    "type": "interior",
+    "template_id": "interior0054",
+    "style_name": "Post-Apocalyptic Style",
+    "prompt": "Post-Apocalyptic interiors are a stylized “ruin aesthetic”: distressed materials, survivalist utility, and dramatic atmosphere. Inspired by dystopian films and games, the look often combines industrial grit with improvised, reclaimed elements—corrugated metal, weathered wood, concrete, exposed fasteners, and patched surfaces. The palette is dusty and desaturated: ash gray, rust, sand, oxidized green, with occasional hazard accents like yellow or red. Lighting is low and directional, using cage lights, work lamps, and flickering warm tones to create tension and mood. Furniture feels rugged: modular pieces, crates, metal shelving, and practical storage that suggests readiness. To keep it from becoming a set, modern versions control the chaos: one distressed feature wall, one salvage-style shelving system, and restrained props. The goal is storytelling and texture—an interior that feels like it has endured."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/medieval.avif",
+    "type": "interior",
+    "template_id": "interior0055",
+    "style_name": "Medieval Style",
+    "prompt": "Medieval interiors draw from European domestic spaces of the Middle Ages: heavy timber, stone, and fortress-like practicality. The style emphasizes robust construction and a sense of historic weight—thick wood beams, rough textures, iron hardware, and furniture built to last. Color palettes tend to be earthy and deep: brown, ochre, burgundy, forest green, and muted gold, often paired with stone grays. Textiles add warmth and heraldic character—wool, leather, tapestries, and patterned fabrics. Lighting is warm and low, often inspired by candlelight: wrought iron chandeliers, lanterns, and amber bulbs. In modern homes, Medieval works best as a “hint” rather than a full reenactment: one heavy wood table, iron sconces, and textured walls can capture the mood without turning the room into a museum. The aim is atmosphere—grounded, dramatic, and timeless."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/halloween.avif",
+    "type": "interior",
+    "template_id": "interior0056",
+    "style_name": "Halloween Style",
+    "prompt": "Halloween decor is a seasonal style focused on playful spookiness and strong atmosphere. The best Halloween interiors start with a tight palette—black, burnt orange, deep purple, bone white—and rely on lighting to set the mood: candles (real or LED), dim lamps, and accent lights. Textures like velvet, gauze, and matte ceramics add depth. Rather than scattering small props everywhere, concentrate decor into a few “scenes”: an entry vignette, a mantel, and a table centerpiece. This keeps the home livable while still photogenic."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/chinese-new-year.avif",
+    "type": "interior",
+    "template_id": "interior0057",
+    "style_name": "Chinese New Year Style",
+    "prompt": "Chinese New Year decor is a festive seasonal style built around symbolism, luck, and warm celebration. Red and gold dominate because they represent prosperity and good fortune, often paired with natural greenery and lantern-like lighting. The most elegant approach uses a consistent palette and focuses on a few meaningful elements: red envelopes (hongbao) displays, paper cuttings, calligraphy, and lanterns. Florals also play a role—plum blossoms, orchids, and citrus branches are common cues—bringing freshness and seasonal energy. Textures like silk, satin, and lacquered accents add richness without needing clutter. Dining settings are central because gathering and food are key to the celebration; a red runner, gold details, and a simple centerpiece can transform the room."
+  },
+  {
+    "example_image": "https://bwbopiabddpxhacfscvq.supabase.co/storage/v1/object/public/uploads/home_styles/tribal.avif",
+    "type": "interior",
+    "template_id": "interior0058",
+    "style_name": "Tribal Style",
+    "prompt": "Tribal-inspired interiors emphasize handcrafted texture, natural materials, and pattern traditions drawn from multiple indigenous cultures. The key is to approach it respectfully: prioritize artisan-made pieces, avoid stereotypes, and focus on material authenticity and geometric craft rather than caricature. Common elements include woven textiles, carved wood, clay pottery, leather, and basketry. Color palettes typically stay earthy—sand, terracotta, charcoal, warm brown—sometimes with black-and-white graphic patterns. Layering is important: a kilim-style rug, textured cushions, and a few sculptural objects create richness without requiring clutter. Furniture is often simple so the textiles can speak. Lighting is warm and natural, using woven shades and soft glow. The best Tribal rooms feel grounded, tactile, and curated—celebrating craft and material story."
+  }
+]
