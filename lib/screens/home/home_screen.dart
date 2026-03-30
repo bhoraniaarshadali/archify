@@ -81,7 +81,14 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     return ListenableBuilder(
       listenable: AppState(),
       builder: (context, _) {
-        if (!AppState().showBottomNav) return const SizedBox.shrink();
+        // CENTRAL LOGIC: Hide bottom nav for Explore section (index 2)
+        // or when explicitly disabled via global state.
+        bool isVisible = AppState().showBottomNav;
+        if (_selectedIndex == 2) {
+          isVisible = false;
+        }
+
+        if (!isVisible) return const SizedBox.shrink();
         
         return FadeTransition(
           opacity: CurvedAnimation(parent: _bottomNavAnim, curve: Curves.easeIn),
@@ -130,9 +137,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       child: GestureDetector(
         onTap: () {
           setState(() => _selectedIndex = index);
-          // Always ensure bottom nav is visible when switching main tabs
-          // ExploreScreen will handle hiding it if needed
-          AppState().setShowBottomNav(true);
         },
         behavior: HitTestBehavior.opaque,
         child: Column(

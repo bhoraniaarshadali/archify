@@ -293,7 +293,7 @@ class BackgroundGenerationManager {
           }
         }
       } else if (state == 'failed' || state == 'fail' || state == 'ERROR' || state == 'error') {
-        await MyCreationsService.deleteByTaskId(taskId);
+        await MyCreationsService.markAsRefunded(taskId, 'api_failed');
         _taskUpdatesController.add(TaskUpdate(taskId, GenerationStatus.failed));
         return true;
       }

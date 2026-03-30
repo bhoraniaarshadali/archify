@@ -66,10 +66,10 @@ class _ItemProcessingScreenState extends State<ItemProcessingScreen> {
       return;
     }
 
-    // 🪙 Credit System Check
+    // 🪙 1. Check Credit Availability (No deduction yet)
     if (mounted) {
-      final hasCredit = await DailyCreditManager.checkAndConsume(context);
-      if (!hasCredit) {
+      final canProceed = await DailyCreditManager.checkCreditOnly(context);
+      if (!canProceed) {
         if (mounted) Navigator.pop(context);
         return;
       }
@@ -120,6 +120,9 @@ class _ItemProcessingScreenState extends State<ItemProcessingScreen> {
         referenceImageUrl,
       );
       if (taskId == null) throw Exception('Failed to create task');
+
+      // 🪙 2. Successful Submission -> DEDUCT CREDIT
+      await DailyCreditManager.consumeCredit();
 
       if (!mounted) return;
       setState(() {

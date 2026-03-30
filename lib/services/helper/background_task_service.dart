@@ -6,6 +6,7 @@ import '../../ads/remote_config_service.dart';
 import 'task_polling_service.dart';
 import 'media_download_service.dart';
 import 'my_creations_service.dart';
+import 'connectivity_service.dart';
 
 class TaskModel {
   final String taskId;
@@ -14,9 +15,13 @@ class TaskModel {
   bool isSuccess;
   bool isProcessing;
   bool isFailed;
+  bool isDownloadFailed;
   String? mediaLink;
   String? thumbnailLink;
   int retryCount;
+  bool creditDeducted;
+  bool creditRefunded;
+  String? refundReason;
 
   TaskModel({
     required this.taskId,
@@ -25,9 +30,13 @@ class TaskModel {
     this.isSuccess = false,
     this.isProcessing = true,
     this.isFailed = false,
+    this.isDownloadFailed = false,
     this.mediaLink,
     this.thumbnailLink,
     this.retryCount = 0,
+    this.creditDeducted = false,
+    this.creditRefunded = false,
+    this.refundReason,
   });
 
   Map<String, dynamic> toJson() => {
@@ -37,9 +46,13 @@ class TaskModel {
         'is_success': isSuccess,
         'is_processing': isProcessing,
         'is_failed': isFailed,
+        'is_download_failed': isDownloadFailed,
         'media_link': mediaLink,
         'thumbnail_link': thumbnailLink,
         'retry_count': retryCount,
+        'credit_deducted': creditDeducted,
+        'credit_refunded': creditRefunded,
+        'refund_reason': refundReason,
       };
 
   factory TaskModel.fromJson(Map<String, dynamic> json) {
@@ -50,9 +63,13 @@ class TaskModel {
       isSuccess: json['is_success'] ?? false,
       isProcessing: json['is_processing'] ?? false,
       isFailed: json['is_failed'] ?? false,
+      isDownloadFailed: json['is_download_failed'] ?? false,
       mediaLink: json['media_link'],
       thumbnailLink: json['thumbnail_link'],
       retryCount: json['retry_count'] ?? 0,
+      creditDeducted: json['credit_deducted'] ?? false,
+      creditRefunded: json['credit_refunded'] ?? false,
+      refundReason: json['refund_reason'],
     );
   }
 }
@@ -132,6 +149,12 @@ class BackgroundTaskService {
     // 🛡️ Lock: Prevent concurrent polling for the same task
     if (_currentlyProcessing.contains(taskId)) return;
     _currentlyProcessing.add(taskId);
+ 
+    // 🌐 Status Check: Skip if offline
+    if (!ConnectivityService.instance.currentStatus) {
+      _currentlyProcessing.remove(taskId);
+      return;
+    }
 
     try {
       final tasks = await getTasks();
@@ -146,12 +169,41 @@ class BackgroundTaskService {
 
       final task = tasks[taskIndex];
 
-      // If already done, stop polling
-      if (!task.isProcessing) {
+      // If already done and NOT a pending download, stop polling
+      if (!task.isProcessing && !task.isDownloadFailed) {
         timer.cancel();
         _activeTimers.remove(taskId);
         _pollCount.remove(taskId);
         _nullResultCount.remove(taskId);
+        return;
+      }
+ 
+      // If task is successful but download failed, retry download only
+      if (task.isSuccess && task.isDownloadFailed && task.mediaLink != null) {
+        debugPrint('[Download Retry] task_id=$taskId');
+        final downloaded = await MediaDownloadService.downloadCreationMedia(
+          mediaUrl: task.mediaLink!,
+          thumbUrl: task.taskType == 'image' ? task.mediaLink : null,
+        );
+ 
+        if (downloaded.mediaFile != null) {
+          debugPrint('[Download Success After Retry] task_id=$taskId');
+          task.isDownloadFailed = false;
+          task.isProcessing = false;
+          task.mediaLink = downloaded.mediaFile!.path;
+          task.thumbnailLink = downloaded.thumbFile?.path;
+          await saveTask(task);
+          
+          await MyCreationsService.updateCreationStatus(
+            taskId,
+            GenerationStatus.success,
+            mediaUrl: downloaded.mediaFile!.path,
+            thumbnailPath: downloaded.thumbFile?.path,
+          );
+          
+          timer.cancel();
+          _activeTimers.remove(taskId);
+        }
         return;
       }
 
@@ -163,7 +215,7 @@ class BackgroundTaskService {
         task.isSuccess = false;
         task.isFailed = true;
         await saveTask(task);
-        await MyCreationsService.deleteByTaskId(taskId);
+        await MyCreationsService.markAsRefunded(taskId, 'timeout');
         timer.cancel();
         _activeTimers.remove(taskId);
         _pollCount.remove(taskId);
@@ -190,7 +242,7 @@ class BackgroundTaskService {
           task.isSuccess = false;
           task.isFailed = true;
           await saveTask(task);
-          await MyCreationsService.deleteByTaskId(taskId);
+          await MyCreationsService.markAsRefunded(taskId, 'api_unresponsive');
           timer.cancel();
           _activeTimers.remove(taskId);
           _nullResultCount.remove(taskId);
@@ -236,8 +288,13 @@ class BackgroundTaskService {
               thumbnailPath: downloaded.thumbFile?.path,
             );
           } else {
-            // Even if download fails, we save the latest task state
+            // Download fails - mark as download failed for retry
+            debugPrint('[Download Failed] task_id=$taskId reason=network_or_storage');
+            task.isDownloadFailed = true;
+            task.isProcessing = false; 
             await saveTask(task);
+            
+            // Do NOT refund. Keep polling for download retry.
           }
 
           timer.cancel();
@@ -252,8 +309,8 @@ class BackgroundTaskService {
         task.isFailed = true;
         await saveTask(task);
 
-        // Remove from MyCreations if failed
-        await MyCreationsService.deleteByTaskId(taskId);
+        // Remove from MyCreations if failed - REFUND
+        await MyCreationsService.markAsRefunded(taskId, 'api_failed');
 
         timer.cancel();
         _activeTimers.remove(taskId);

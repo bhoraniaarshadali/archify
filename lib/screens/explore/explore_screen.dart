@@ -2,7 +2,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../reels/reels_screen.dart';
 import '../home/home_screen.dart';
-import '../../ads/app_state.dart';
 
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
@@ -23,18 +22,11 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
 
   void _handleTabChange() {
     setState(() {}); // Rebuild for switcher state
-    if (_tabController.indexIsChanging) return;
-    final isReels = _tabController.index == 1;
-    AppState().setShowBottomNav(!isReels);
   }
 
   @override
   void dispose() {
     _tabController.removeListener(_handleTabChange);
-    // Ensure bottom nav is visible when leaving ExploreScreen
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      AppState().setShowBottomNav(true);
-    });
     _tabController.dispose();
     super.dispose();
   }
@@ -42,17 +34,40 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _tabController.index == 1 ? Colors.black : const Color(0xFFF8F9FC),
+      backgroundColor: _tabController.index == 0 ? Colors.black : const Color(0xFFF8F9FC),
       body: Stack(
         children: [
           // Content
           TabBarView(
             controller: _tabController,
             children: [
-              _buildInspirationView(),
               const ReelsScreen(),
+              _buildInspirationView(),
             ],
           ),
+          
+          // Top Gradient Fade (More visible in Reels)
+          if (_tabController.index == 0)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 200,
+              child: IgnorePointer(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withOpacity(0.6),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
           
           // Floating Top Switcher
           Positioned(
@@ -71,13 +86,11 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
     return Container(
       padding: EdgeInsets.only(top: topPadding + 10, left: 16, right: 16),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           // Back Button
           _buildGlassCircleButton(
             icon: Icons.arrow_back_ios_new,
             onTap: () {
-              AppState().setShowBottomNav(true);
               Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(builder: (_) => const HomeScreen()),
                 (route) => false,
@@ -103,8 +116,8 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    _buildSwitchTab('Inspiration', 0),
-                    _buildSwitchTab('Reels', 1),
+                    _buildSwitchTab('Reels', 0),
+                    _buildSwitchTab('Inspiration', 1),
                   ],
                 ),
               ),

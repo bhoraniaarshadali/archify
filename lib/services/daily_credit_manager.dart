@@ -59,25 +59,6 @@ class DailyCreditManager {
     debugPrint('🔄 Daily Credit Reset: $remoteCreditValue allotted. (ISO: ${now.toIso8601String()})');
   }
 
-  /// Consume one credit
-  /// Returns true if credit was consumed, false if no credits left
-  static Future<bool> consumeCredit() async {
-    if (AppState.planTier == PlanTier.architect) return true; // Only Architect gets unlimited
-
-    if (creditsNotifier.value <= 0) {
-      debugPrint('🚫 No Daily Credits Left');
-      return false;
-    }
-
-    final prefs = await SharedPreferences.getInstance();
-    final newValue = creditsNotifier.value - 1;
-    
-    await prefs.setInt(_keyCredits, newValue);
-    creditsNotifier.value = newValue;
-    
-    debugPrint('➖ Credit Used. Remaining: $newValue');
-    return true;
-  }
 
   /// Consume generic amount of credits
   static Future<void> useCredits(int amount) async {
@@ -102,15 +83,42 @@ class DailyCreditManager {
     debugPrint('➕ Credits Added: $amount. Total: $newValue');
   }
 
+  /// Refund credits back to user (e.g. on failed generation)
+  static Future<void> refundCredit(int amount) async {
+    if (amount <= 0) return;
+    if (AppState.planTier == PlanTier.architect) return; // Architect doesn't need refunds
+    
+    await addCredits(amount);
+    debugPrint('🔄 Credits Refunded: $amount');
+  }
+
+  /// Check if user can proceed with generation (without consuming)
+  static Future<bool> checkCreditOnly(BuildContext context) async {
+    return await PremiumValidationService.canGenerateImage(context);
+  }
+
   /// Check and consume credit with UI feedback
   /// Returns true if execution should continue
   static Future<bool> checkAndConsume(BuildContext context) async {
-    final canProceed = await PremiumValidationService.canGenerateImage(context);
+    final canProceed = await checkCreditOnly(context);
     if (canProceed) {
       return await consumeCredit();
     }
-    
     return false;
+  }
+
+  /// Silently consume credit (1 credit)
+  static Future<bool> consumeCredit() async {
+    final credits = getRemainingCredit();
+    if (AppState.planTier == PlanTier.architect) return true;
+    if (credits <= 0) return false;
+
+    final prefs = await SharedPreferences.getInstance();
+    final newValue = credits - 1;
+    await prefs.setInt(_keyCredits, newValue);
+    creditsNotifier.value = newValue;
+    debugPrint('🪙 Credit Consumed. Remaining: $newValue');
+    return true;
   }
 
   /// Show a dialog when credits are exhausted

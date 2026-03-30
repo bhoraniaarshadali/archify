@@ -113,7 +113,7 @@ class _ReelItemState extends State<ReelItem> with SingleTickerProviderStateMixin
     super.initState();
     _fadeController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 1000), // Slower, smoother fade
     );
     _initializeVideo();
   }
@@ -165,12 +165,15 @@ class _ReelItemState extends State<ReelItem> with SingleTickerProviderStateMixin
       _showMuteIndicator = true;
     });
 
-    _fadeController.forward(from: 0).then((_) {
-      Future.delayed(const Duration(milliseconds: 500), () {
-        if (mounted) {
-          setState(() => _showMuteIndicator = false);
-        }
-      });
+    _fadeController.reset();
+    Future.delayed(const Duration(milliseconds: 600), () {
+      if (mounted) {
+        _fadeController.forward().then((_) {
+          if (mounted) {
+            setState(() => _showMuteIndicator = false);
+          }
+        });
+      }
     });
 
     widget.onMuteToggle?.call();
@@ -229,92 +232,101 @@ class _ReelItemState extends State<ReelItem> with SingleTickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: _toggleMute,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          if (_isInitialized && _controller != null)
-            Center(
-              child: AspectRatio(
-                aspectRatio: _controller!.value.aspectRatio,
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        if (_isInitialized && _controller != null)
+          SizedBox.expand(
+            child: FittedBox(
+              fit: BoxFit.cover,
+              child: SizedBox(
+                width: _controller!.value.size.width,
+                height: _controller!.value.size.height,
                 child: VideoPlayer(_controller!),
               ),
-            )
-          else if (_hasError)
-            const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.error_outline, color: Colors.white, size: 40),
-                  SizedBox(height: 8),
-                  Text('Failed to load video', style: TextStyle(color: Colors.white)),
-                ],
-              ),
-            )
-          else
-            const Center(child: CircularProgressIndicator(color: Colors.white)),
-          
-          // Mute/Unmute Indicator Overlay
-          if (_showMuteIndicator)
-            Center(
-              child: FadeTransition(
-                opacity: Tween<double>(begin: 1.0, end: 0.0).animate(_fadeController),
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.5),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    ReelsScreen.isGlobalMuted ? Icons.volume_off : Icons.volume_up,
-                    color: Colors.white,
-                    size: 40,
-                  ),
+            ),
+          )
+        else if (_hasError)
+          const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.error_outline, color: Colors.white, size: 40),
+                SizedBox(height: 8),
+                Text('Failed to load video', style: TextStyle(color: Colors.white)),
+              ],
+            ),
+          )
+        else
+          const Center(child: CircularProgressIndicator(color: Colors.white)),
+        
+        // Mute/Unmute Indicator Overlay
+        if (_showMuteIndicator)
+          Center(
+            child: FadeTransition(
+              opacity: Tween<double>(begin: 1.0, end: 0.0).animate(_fadeController),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.5),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  ReelsScreen.isGlobalMuted ? Icons.volume_off : Icons.volume_up,
+                  color: Colors.white,
+                  size: 40,
                 ),
               ),
             ),
+          ),
 
-          // UI Overlay
-          Positioned(
-            bottom: 40,
-            left: 16,
-            right: 70,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  '@archify_ai',
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Check out this amazing AI-generated interior transformation! ✨ #InteriorDesign #AI',
-                  style: TextStyle(color: Colors.white, fontSize: 14),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
+        // UI Overlay
+        Positioned(
+          bottom: 40,
+          left: 16,
+          right: 70,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                '@archify_ai',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Check out this amazing AI-generated interior transformation! ✨ #InteriorDesign #AI',
+                style: TextStyle(color: Colors.white, fontSize: 14),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
           ),
-          
-          // Right side buttons
-          Positioned(
-            bottom: 100,
-            right: 16,
-            child: Column(
-              children: [
-                _buildActionButton(
-                  _isDownloading ? Icons.hourglass_empty : Icons.file_download_outlined, 
-                  _isDownloading ? 'Downloading...' : 'Download',
-                  onTap: _downloadVideo,
-                  isLoading: _isDownloading,
-                ),
-              ],
-            ),
+        ),
+        
+        // Right side buttons
+        Positioned(
+          bottom: 100,
+          right: 16,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Mute/Unmute Action Button
+              _buildActionButton(
+                ReelsScreen.isGlobalMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
+                ReelsScreen.isGlobalMuted ? 'Muted' : 'Sound',
+                onTap: _toggleMute,
+              ),
+              const SizedBox(height: 20),
+              // Download Action Button
+              _buildActionButton(
+                Icons.file_download_outlined, 
+                'Download',
+                onTap: _downloadVideo,
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -324,14 +336,14 @@ class _ReelItemState extends State<ReelItem> with SingleTickerProviderStateMixin
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: Colors.black.withOpacity(0.35),
               shape: BoxShape.circle,
             ),
             child: isLoading 
-              ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-              : Icon(icon, color: Colors.white, size: 30),
+              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+              : Icon(icon, color: Colors.white, size: 24),
           ),
           const SizedBox(height: 6),
           Text(

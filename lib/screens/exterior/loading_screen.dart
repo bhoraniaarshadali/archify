@@ -10,7 +10,7 @@ import '../../services/helper/my_creations_service.dart';
 import '../../services/helper/background_generation_manager.dart';
 import '../../services/helper/temp_file_upload_service.dart';
 import '../../services/kieUse/exterior_service.dart';
-import '../../services/premium/premium_validation_service.dart';
+import '../../services/daily_credit_manager.dart';
 import '../../utils/loading_tips_provider.dart';
 
 
@@ -92,9 +92,9 @@ class _LoadingScreenState extends State<LoadingScreen>
       return;
     }
 
-    // 🪙 Premium & Credit Validation
+    // 🪙 1. Check Credit Availability (No deduction yet)
     if (mounted) {
-      final canProceed = await PremiumValidationService.canGenerateImage(context);
+      final canProceed = await DailyCreditManager.checkCreditOnly(context);
       if (!canProceed) {
         if (mounted) Navigator.pop(context);
         return;
@@ -134,6 +134,9 @@ class _LoadingScreenState extends State<LoadingScreen>
       );
       
       if (taskId == null) throw Exception('Generation failed to start');
+      
+      // 🪙 2. Successful Submission -> DEDUCT CREDIT
+      await DailyCreditManager.consumeCredit();
       if (!mounted) return;
 
       // ✅ Save as Processing

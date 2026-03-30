@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../ads/remote_config_service.dart';
 import 'media_download_service.dart';
+import '../daily_credit_manager.dart';
 
 enum CreationType { image, video }
 
@@ -53,6 +54,9 @@ class MyCreation {
   final bool isDownloaded;
   final GenerationStatus status;
   final String? taskId;
+  final bool creditDeducted;
+  final bool creditRefunded;
+  final String? refundReason;
 
   MyCreation({
     required this.id,
@@ -67,6 +71,9 @@ class MyCreation {
     this.isDownloaded = false,
     this.status = GenerationStatus.success,
     this.taskId,
+    this.creditDeducted = false,
+    this.creditRefunded = false,
+    this.refundReason,
   });
 
   Map<String, dynamic> toJson() => {
@@ -82,6 +89,9 @@ class MyCreation {
     'isDownloaded': isDownloaded,
     'status': status.name,
     'taskId': taskId,
+    'creditDeducted': creditDeducted,
+    'creditRefunded': creditRefunded,
+    'refundReason': refundReason,
   };
 
   factory MyCreation.fromJson(Map<String, dynamic> json) {
@@ -100,6 +110,9 @@ class MyCreation {
           ? GenerationStatus.values.byName(json['status'] as String)
           : GenerationStatus.success,
       taskId: json['taskId'] as String?,
+      creditDeducted: json['creditDeducted'] as bool? ?? false,
+      creditRefunded: json['creditRefunded'] as bool? ?? false,
+      refundReason: json['refundReason'] as String?,
     );
   }
 }
@@ -212,6 +225,8 @@ class MyCreationsService {
         status: GenerationStatus.processing,
         taskId: taskId,
         isDownloaded: false,
+        creditDeducted: true, // Mark as deducted when initially processing successfully
+        creditRefunded: false,
       );
 
       await saveCreation(creation);
@@ -241,6 +256,9 @@ class MyCreationsService {
       isDownloaded: mediaUrl != null,
       status: status,
       taskId: old.taskId,
+      creditDeducted: old.creditDeducted,
+      creditRefunded: old.creditRefunded,
+      refundReason: old.refundReason,
     );
 
     creations[index] = updated;
@@ -331,6 +349,50 @@ class MyCreationsService {
 
     _cachedList = creations;
     creationsChangeNotifier.value++;
+  }
+
+  static Future<void> markAsRefunded(String taskId, String reason) async {
+    try {
+      final creations = await getCreations();
+      final index = creations.indexWhere((c) => c.taskId == taskId);
+      if (index == -1) return;
+
+      final old = creations[index];
+      if (old.creditRefunded) {
+        debugPrint('⚠️ Task $taskId already refunded. Skipping.');
+        return;
+      }
+
+      final updated = MyCreation(
+        id: old.id,
+        type: old.type,
+        category: old.category,
+        mediaUrl: old.mediaUrl,
+        originalMediaUrl: old.originalMediaUrl,
+        thumbnailPath: old.thumbnailPath,
+        thumbnailUrl: old.thumbnailUrl,
+        createdAt: old.createdAt,
+        metadata: old.metadata,
+        isDownloaded: old.isDownloaded,
+        status: GenerationStatus.failed,
+        taskId: old.taskId,
+        creditDeducted: old.creditDeducted,
+        creditRefunded: true,
+        refundReason: reason,
+      );
+
+      creations[index] = updated;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_storageKey, json.encode(creations.map((c) => c.toJson()).toList()));
+      _cachedList = creations;
+      creationsChangeNotifier.value++;
+
+      // Actually refund the credit
+      await DailyCreditManager.refundCredit(1);
+      debugPrint('💰 Credit Refunded for Task $taskId (Reason: $reason)');
+    } catch (e) {
+      debugPrint('❌ Error marking as refunded: $e');
+    }
   }
 
   static bool isVideoProcessingSync() {
