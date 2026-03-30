@@ -7,8 +7,8 @@ import '../../ads/remote_config_service.dart';
 /// Orchestrates between KIE AI (Nano Banana) and APIFree (GPT-1.5)
 /// based on Remote Config.
 class InteriorImageService {
-  static String get _kieApiKey => RemoteConfigService.getKieApiKey();
-  static String get _apiFreeKey => RemoteConfigService.getApiFreeKey();
+  static String get _kieApiKey => RemoteConfigService.getKieApiKey(FeatureType.interior);
+  static String get _apiFreeKey => RemoteConfigService.getApiFreeKey(FeatureType.interior);
   
   static const String _kieBaseUrl = 'https://api.kie.ai/api/v1';
   static const String _apiFreeBaseUrl = 'https://api.apifree.ai/v1';

@@ -5,7 +5,7 @@ import '../../ads/remote_config_service.dart';
 import '../../prompts/floor_plan_prompts.dart';
 
 class FloorPlanService {
-  static String get _apiFreeKey => RemoteConfigService.getApiFreeKey();
+  static String get _apiFreeKey => RemoteConfigService.getApiFreeKey(FeatureType.floorPlan);
   static const String _apiFreeBaseUrl = 'https://api.apifree.ai/v1';
   static const String _modelApiFree = 'black-forest-labs/flux-2-dev/edit';  // cost inr0.90 dollar 0.00996
 

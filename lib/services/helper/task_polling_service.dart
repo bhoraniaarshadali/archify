@@ -10,8 +10,6 @@ import '../../ads/remote_config_service.dart';
 /// - Task Polling (checking status)
 /// - Image Downloading
 class TaskPollingService {
-  static String get _apiKey => RemoteConfigService.getKieApiKey();
-  static String get _apiFreeKey => RemoteConfigService.getApiFreeKey();
   static const String _baseUrl = 'https://api.kie.ai/api/v1';
   static const String _apiFreeBaseUrl = 'https://api.apifree.ai/v1';
 
@@ -111,7 +109,7 @@ class TaskPollingService {
   }
 
   /// Query KIE API task status
-  static Future<Map<String, dynamic>?> queryKieTask(String taskId) async {
+  static Future<Map<String, dynamic>?> queryKieTask(String taskId, FeatureType feature) async {
      // 🔹 MOCK FLOW
     if (TESTING_MODE && taskId.startsWith('fake_task_result_start-')) {
        debugPrint('🚧 TESTING MODE: Simulating Polling Success (KIE)...');
@@ -126,9 +124,10 @@ class TaskPollingService {
     }
 
     try {
+      final apiKey = RemoteConfigService.getKieApiKey(feature);
       final response = await http.get(
         Uri.parse('$_baseUrl/jobs/recordInfo?taskId=$taskId'),
-        headers: {'Authorization': 'Bearer $_apiKey'},
+        headers: {'Authorization': 'Bearer $apiKey'},
       );
 
       if (response.statusCode == 200) {
@@ -146,7 +145,7 @@ class TaskPollingService {
   }
 
   /// Query APIFree task result
-  static Future<Map<String, dynamic>?> queryApiFreeTask(String requestId) async {
+  static Future<Map<String, dynamic>?> queryApiFreeTask(String requestId, FeatureType feature) async {
     // 🔹 MOCK FLOW
     if (TESTING_MODE && requestId.startsWith('fake_task_result_start-')) {
       debugPrint('🚧 TESTING MODE: Simulating Polling Success...');
@@ -159,9 +158,10 @@ class TaskPollingService {
     }
 
     try {
+      final apiFreeKey = RemoteConfigService.getApiFreeKey(feature);
       final response = await http.get(
         Uri.parse('$_apiFreeBaseUrl/image/$requestId/result'),
-        headers: {'Authorization': 'Bearer $_apiFreeKey'},
+        headers: {'Authorization': 'Bearer $apiFreeKey'},
       );
 
       if (response.statusCode == 200) {
@@ -178,11 +178,12 @@ class TaskPollingService {
   }
 
   /// Query Video task status and result
-  static Future<Map<String, dynamic>?> queryVideoTask(String requestId) async {
+  static Future<Map<String, dynamic>?> queryVideoTask(String requestId, FeatureType feature) async {
     try {
+      final apiFreeKey = RemoteConfigService.getApiFreeKey(feature);
       final statusResp = await http.get(
         Uri.parse('$_apiFreeBaseUrl/video/$requestId/status'),
-        headers: {'Authorization': 'Bearer $_apiFreeKey'},
+        headers: {'Authorization': 'Bearer $apiFreeKey'},
       );
 
       if (statusResp.statusCode == 200) {
@@ -193,7 +194,7 @@ class TaskPollingService {
           if (status == 'success') {
             final resultResp = await http.get(
               Uri.parse('$_apiFreeBaseUrl/video/$requestId/result'),
-              headers: {'Authorization': 'Bearer $_apiFreeKey'},
+              headers: {'Authorization': 'Bearer $apiFreeKey'},
             );
             
             if (resultResp.statusCode == 200) {

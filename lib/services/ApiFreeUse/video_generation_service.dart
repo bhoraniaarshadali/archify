@@ -5,7 +5,7 @@ import '../../ads/remote_config_service.dart';
 import '../helper/my_creations_service.dart';
 
 class VideoGenerationService {
-  static String get _apiKey => RemoteConfigService.getApiFreeKey();
+  static String get _apiKey => RemoteConfigService.getApiFreeKey(FeatureType.videoGeneration);
   static const String _baseUrl = 'https://api.apifree.ai';
   static const String _model = 'klingai/kling-v2.5-turbo/standard/image-to-video';
 

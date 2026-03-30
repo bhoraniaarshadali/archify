@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import '../../ads/remote_config_service.dart';
 
 class TextToImageZImageService {
-  static String get _apiKey => RemoteConfigService.getKieApiKey();
+  static String get _apiKey => RemoteConfigService.getKieApiKey(FeatureType.imageGeneration);
   static const String _baseUrl = 'https://api.kie.ai/api/v1';
   static const String _model = 'z-image';
 

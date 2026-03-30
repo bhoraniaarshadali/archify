@@ -5,7 +5,7 @@ import '../../ads/remote_config_service.dart';
 import '../../prompts/style_transfer_prompts.dart';
 
 class StyleTransferService {
-  static String get _apiKey => RemoteConfigService.getApiFreeKey();
+  static String get _apiKey => RemoteConfigService.getApiFreeKey(FeatureType.styleTransfer);
   static const String _baseUrl = 'https://api.apifree.ai/v1';
   static const String _model = 'black-forest-labs/flux-2-pro/edit';
 

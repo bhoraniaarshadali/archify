@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../ads/remote_config_service.dart';
 import 'task_polling_service.dart';
 import 'media_download_service.dart';
 import 'my_creations_service.dart';
@@ -9,6 +10,7 @@ import 'my_creations_service.dart';
 class TaskModel {
   final String taskId;
   final String taskType; // "video" or "image"
+  final FeatureType featureType;
   bool isSuccess;
   bool isProcessing;
   bool isFailed;
@@ -19,6 +21,7 @@ class TaskModel {
   TaskModel({
     required this.taskId,
     required this.taskType,
+    required this.featureType,
     this.isSuccess = false,
     this.isProcessing = true,
     this.isFailed = false,
@@ -30,6 +33,7 @@ class TaskModel {
   Map<String, dynamic> toJson() => {
         'task_id': taskId,
         'task_type': taskType,
+        'feature_type': featureType.name,
         'is_success': isSuccess,
         'is_processing': isProcessing,
         'is_failed': isFailed,
@@ -42,6 +46,7 @@ class TaskModel {
     return TaskModel(
       taskId: json['task_id'],
       taskType: json['task_type'],
+      featureType: FeatureType.values.byName(json['feature_type'] ?? 'interior'),
       isSuccess: json['is_success'] ?? false,
       isProcessing: json['is_processing'] ?? false,
       isFailed: json['is_failed'] ?? false,
@@ -98,7 +103,7 @@ class BackgroundTaskService {
   }
 
   /// 🚀 START POLLING
-  void startPolling(String taskId, String type) async {
+  void startPolling(String taskId, String type, FeatureType feature) async {
     if (_activeTimers.containsKey(taskId)) {
       debugPrint('⚠️ Polling already active for $taskId');
       return;
@@ -107,7 +112,7 @@ class BackgroundTaskService {
     debugPrint('[Polling Started] task_id=$taskId');
 
     _activeTimers[taskId] = Timer.periodic(const Duration(seconds: 3), (timer) async {
-      await _pollTask(taskId, type, timer);
+      await _pollTask(taskId, type, feature, timer);
     });
   }
 
@@ -118,12 +123,12 @@ class BackgroundTaskService {
 
     debugPrint('🔄 Resuming ${pending.length} background tasks...');
     for (final task in pending) {
-      startPolling(task.taskId, task.taskType);
+      startPolling(task.taskId, task.taskType, task.featureType);
     }
   }
 
   /// 🔍 INTERNAL POLLING LOGIC
-  Future<void> _pollTask(String taskId, String type, Timer timer) async {
+  Future<void> _pollTask(String taskId, String type, FeatureType feature, Timer timer) async {
     // 🛡️ Lock: Prevent concurrent polling for the same task
     if (_currentlyProcessing.contains(taskId)) return;
     _currentlyProcessing.add(taskId);
@@ -168,11 +173,11 @@ class BackgroundTaskService {
 
       Map<String, dynamic>? result;
       if (type == 'video') {
-        result = await TaskPollingService.queryVideoTask(taskId);
+        result = await TaskPollingService.queryVideoTask(taskId, feature);
       } else {
         // Try KIE first, then APIFree
-        final kieResult = await TaskPollingService.queryKieTask(taskId);
-        final apiFreeResult = kieResult == null ? await TaskPollingService.queryApiFreeTask(taskId) : null;
+        final kieResult = await TaskPollingService.queryKieTask(taskId, feature);
+        final apiFreeResult = kieResult == null ? await TaskPollingService.queryApiFreeTask(taskId, feature) : null;
         result = kieResult ?? apiFreeResult;
       }
 

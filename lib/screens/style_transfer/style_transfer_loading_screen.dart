@@ -5,7 +5,6 @@ import 'dart:async';
 import '../../services/helper/connectivity_service.dart';
 import '../../services/helper/image_compression_service.dart';
 import '../../services/helper/my_creations_service.dart';
-import '../../services/helper/task_polling_service.dart';
 import '../../services/helper/temp_file_upload_service.dart';
 import '../../utils/loading_tips_provider.dart';
 import '../exterior/result_screen.dart';

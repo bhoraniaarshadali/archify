@@ -9,7 +9,7 @@ class KieApiService {
 
   /// Sends a chat request and returns a stream of responses
   Stream<Map<String, dynamic>> streamChat(List<ChatMessage> messages) async* {
-    final String apiKey = RemoteConfigService.getKieApiKey();
+    final String apiKey = RemoteConfigService.getKieApiKey(FeatureType.chatbot);
     if (apiKey.isEmpty) {
       debugPrint('[KieAI Error]: API Key not found');
       yield {'error': 'Kie API Key (kie_api_key) not found in Remote Config'};

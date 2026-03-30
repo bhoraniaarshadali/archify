@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import '../../ads/remote_config_service.dart';
 import 'media_download_service.dart';
 
 enum CreationType { image, video }
@@ -11,7 +11,6 @@ enum GenerationStatus {
   success,
   failed,
 }
-
 
 enum CreationCategory {
   interior,
@@ -23,6 +22,22 @@ enum CreationCategory {
   replaceObject, 
   floorPlan,
   styleTransfer,
+}
+
+extension CreationCategoryX on CreationCategory {
+  FeatureType get featureType {
+    switch (this) {
+      case CreationCategory.interior: return FeatureType.interior;
+      case CreationCategory.exterior: return FeatureType.exterior;
+      case CreationCategory.garden: return FeatureType.garden;
+      case CreationCategory.textToImage: return FeatureType.imageGeneration;
+      case CreationCategory.model3D: return FeatureType.object2dTo3d;
+      case CreationCategory.removeObject: return FeatureType.objectRemove;
+      case CreationCategory.replaceObject: return FeatureType.objectReplace;
+      case CreationCategory.floorPlan: return FeatureType.floorPlan;
+      case CreationCategory.styleTransfer: return FeatureType.styleTransfer;
+    }
+  }
 }
 
 class MyCreation {
@@ -54,7 +69,6 @@ class MyCreation {
     this.taskId,
   });
 
-
   Map<String, dynamic> toJson() => {
     'id': id,
     'type': type.name,
@@ -69,7 +83,6 @@ class MyCreation {
     'status': status.name,
     'taskId': taskId,
   };
-
 
   factory MyCreation.fromJson(Map<String, dynamic> json) {
     return MyCreation(
@@ -144,7 +157,6 @@ class MyCreationsService {
     }
   }
 
-  // Existing methods...
   static Future<void> saveCreation(MyCreation creation) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -239,7 +251,6 @@ class MyCreationsService {
     creationsChangeNotifier.value++;
   }
 
-
   static Future<List<MyCreation>> getCreations() async {
     if (_cachedList != null) return _cachedList!;
 
@@ -293,7 +304,6 @@ class MyCreationsService {
     }
   }
 
-  // Optional: Call this when you finish downloading a remote file
   static Future<void> markAsDownloaded(String id, String newLocalPath) async {
     final creations = await getCreations();
     final index = creations.indexWhere((c) => c.id == id);

@@ -7,7 +7,7 @@ import '../helper/my_creations_service.dart';
 /// Permanent Service for Interior Image Generation using openai/gpt-image-1.5/edit
 /// Hard-locked to GPT-1.5 Edit model for all interior flows.
 class InteriorImageEditService {
-  static String get _apiKey => RemoteConfigService.getApiFreeKey();
+  static String get _apiKey => RemoteConfigService.getApiFreeKey(FeatureType.interior);
   static const String _baseUrl = 'https://api.apifree.ai/v1';
   static const String _model = 'openai/gpt-image-1.5/edit';
   

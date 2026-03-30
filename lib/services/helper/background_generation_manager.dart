@@ -177,10 +177,11 @@ class BackgroundGenerationManager {
     final task = TaskModel(
       taskId: taskId,
       taskType: type.name,
+      featureType: category.featureType,
     );
     
     await BackgroundTaskService.instance.saveTask(task);
-    BackgroundTaskService.instance.startPolling(taskId, type.name);
+    BackgroundTaskService.instance.startPolling(taskId, type.name, category.featureType);
   }
 
   /*
@@ -225,10 +226,10 @@ class BackgroundGenerationManager {
       Map<String, dynamic>? result;
 
       if (type == CreationType.video) {
-        result = await TaskPollingService.queryVideoTask(taskId);
+        result = await TaskPollingService.queryVideoTask(taskId, category.featureType);
       } else {
-        final kieResult = await TaskPollingService.queryKieTask(taskId);
-        final apiFreeResult = kieResult == null ? await TaskPollingService.queryApiFreeTask(taskId) : null;
+        final kieResult = await TaskPollingService.queryKieTask(taskId, category.featureType);
+        final apiFreeResult = kieResult == null ? await TaskPollingService.queryApiFreeTask(taskId, category.featureType) : null;
         result = kieResult ?? apiFreeResult;
       }
       

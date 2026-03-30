@@ -12,6 +12,7 @@ import '../premium/premium_module_screen.dart';
 import '../settings/settings_screen.dart';
 import '../../navigation/app_navigator.dart';
 import '../../ads/app_state.dart';
+import '../../ads/remote_config_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -109,7 +110,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 child: Row(
                   children: [
                     _navTab(0, "Home", CupertinoIcons.home),
-                    _navTab(1, "Assistants", CupertinoIcons.person_2),
+                    if (RemoteConfigService.isFeatureEnabled(FeatureType.chatbot))
+                      _navTab(1, "Assistants", CupertinoIcons.person_2),
                     _navTab(2, "Explore", CupertinoIcons.compass),
                     _navTab(3, "History", CupertinoIcons.time),
                   ],

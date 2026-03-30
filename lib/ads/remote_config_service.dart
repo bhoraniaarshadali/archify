@@ -94,10 +94,30 @@ import 'dart:convert';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/foundation.dart';
 
+enum FeatureType {
+  interior('interior'),
+  exterior('exterior'),
+  garden('garden'),
+  chatbot('chatbot'),
+  objectRemove('object_remove'),
+  objectReplace('object_replace'),
+  object2dTo3d('object_2d_to_3d'),
+  styleTransfer('style_transfer'),
+  floorPlan('floor_plan'),
+  videoGeneration('video_generation'),
+  imageGeneration('image_generation');
+
+  final String suffix;
+  const FeatureType(this.suffix);
+
+  String get kieKey => 'kie_api_key_$suffix';
+  String get apiFreeKey => 'apifree_key_$suffix';
+  String get enabledKey => '${suffix}_enabled';
+}
+
 class RemoteConfigService {
   static FirebaseRemoteConfig get _remoteConfig => FirebaseRemoteConfig.instance;
 
-  // ⚡ PERFORMANCE: JSON parsing is expensive, so we cache it.
   static Map<String, dynamic>? _cachedJson;
 
   static Future<void> init() async {
@@ -105,21 +125,16 @@ class RemoteConfigService {
       await _remoteConfig.setConfigSettings(
         RemoteConfigSettings(
           fetchTimeout: const Duration(seconds: 10),
-          // 🚀 PRODUCTION: 1 hour interval, DEBUG: 0 for instant testing
           minimumFetchInterval: kDebugMode ? Duration.zero : const Duration(hours: 1),
         ),
       );
 
-      // Initial fetch
       await _remoteConfig.fetchAndActivate();
-
-      // Clear cache to ensure fresh data after fetch
       _cachedJson = null;
 
-      // 🔥 REAL-TIME: Listen for config updates while the app is running
       _remoteConfig.onConfigUpdated.listen((event) async {
         await _remoteConfig.activate();
-        _cachedJson = null; // Reset cache on update
+        _cachedJson = null;
         debugPrint('🔥 RemoteConfig: Real-time update activated');
       });
 
@@ -132,26 +147,52 @@ class RemoteConfigService {
   static Future<void> refresh() async {
     try {
       await _remoteConfig.fetchAndActivate();
-      _cachedJson = null; // Clear cache on manual refresh
+      _cachedJson = null;
     } catch (e) {
       debugPrint('🔥 RemoteConfig: Refresh failed: $e');
     }
   }
 
-  /// Private helper to get decoded JSON with caching logic
   static Map<String, dynamic> _json() {
     if (_cachedJson != null) return _cachedJson!;
-
     try {
       final String jsonString = _remoteConfig.getString('v1_home_decor');
       if (jsonString.isEmpty) return {};
-
       _cachedJson = jsonDecode(jsonString);
       return _cachedJson!;
     } catch (e) {
       debugPrint('🔥 RemoteConfig parse error: $e');
       return {};
     }
+  }
+
+  // 🛠️ FEATURE STATUS & ENABLING
+  static String getFeatureStatus(FeatureType feature) {
+    final key = feature.enabledKey;
+    final topLevel = _remoteConfig.getString(key);
+    if (topLevel.isNotEmpty) return topLevel;
+    return _json()[key]?.toString() ?? '1';
+  }
+
+  static bool isFeatureEnabled(FeatureType feature) {
+    final status = getFeatureStatus(feature);
+    // "11" means hidden/disabled, everything else (especially "1") is enabled
+    return status != '11';
+  }
+
+  // 🛠️ API KEYS (New Methods)
+  static String getKieApiKey(FeatureType feature) {
+    final key = feature.kieKey;
+    final topLevel = _remoteConfig.getString(key);
+    if (topLevel.isNotEmpty) return topLevel;
+    return _json()[key]?.toString() ?? _json()['kie_api_key']?.toString() ?? '';
+  }
+
+  static String getApiFreeKey(FeatureType feature) {
+    final key = feature.apiFreeKey;
+    final topLevel = _remoteConfig.getString(key);
+    if (topLevel.isNotEmpty) return topLevel;
+    return _json()[key]?.toString() ?? _json()['apifree_key']?.toString() ?? '';
   }
 
   // 📱 AD IDs
@@ -161,38 +202,24 @@ class RemoteConfigService {
 
   static bool isAdsGloballyDisabled() {
     final config = _json();
-    final nativeId = config['nativeAd_id']?.toString();
-    final interstitialId = config['interstitialAd_id']?.toString();
-
-    // Check for '11' flag or explicit disabled boolean if you add it later
-    return nativeId == '11' || interstitialId == '11';
+    return config['nativeAd_id']?.toString() == '11' || config['interstitialAd_id']?.toString() == '11';
   }
 
   // 📊 AD FREQUENCY
   static int getInterstitialFrequency() => _json()['interstitial_frequency'] ?? 1;
-
-  // 🛠️ API KEYS
-  static String getKieApiKey() {
-    final topLevel = _remoteConfig.getString('kie_api_key');
-    if (topLevel.isNotEmpty) return topLevel;
-    return _json()['kie_api_key']?.toString() ?? '';
-  }
 
   static String getInteriorProviderSelection() {
     final topLevel = _remoteConfig.getString('interior_provider_selection');
     if (topLevel.isNotEmpty) return topLevel;
     return _json()['interior_provider_selection']?.toString() ?? 'apifree';
   }
-  
-  static String getApiFreeKey() => _json()['apifree_key']?.toString() ?? '';
 
   static String getMaintenanceMode() {
     final topLevel = _remoteConfig.getString('maintenance_mode');
     if (topLevel.isNotEmpty) return topLevel;
-
     return _json()['maintenance_mode']?.toString() ?? 'off';
   }
 
   // 🪙 DAILY CREDIT
   static int getDailyCredit() => _json()['daily_credit'] ?? 0;
-}
+}

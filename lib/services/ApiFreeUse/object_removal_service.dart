@@ -5,7 +5,7 @@ import '../../ads/remote_config_service.dart';
 import '../../prompts/object_removal_prompts.dart';
 
 class ObjectRemovalService {
-  static String get _apiFreeKey => RemoteConfigService.getApiFreeKey();
+  static String get _apiFreeKey => RemoteConfigService.getApiFreeKey(FeatureType.objectRemove);
   static const String _apiFreeBaseUrl = 'https://api.apifree.ai/v1';
   static const String _removeObjectModel = 'openai/gpt-image-1-mini/edit';
 

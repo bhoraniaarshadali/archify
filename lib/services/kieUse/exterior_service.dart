@@ -7,7 +7,7 @@ import '../../ads/remote_config_service.dart';
 import '../../prompts/exterior_prompts.dart';
 
 class ExteriorService {
-  static String get _apiKey => RemoteConfigService.getKieApiKey();
+  static String get _apiKey => RemoteConfigService.getKieApiKey(FeatureType.exterior);
   static const String _baseUrl = 'https://api.kie.ai/api/v1';
   static const String _model = 'flux-2/pro-image-to-image';
 

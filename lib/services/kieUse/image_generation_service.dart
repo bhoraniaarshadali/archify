@@ -5,7 +5,7 @@ import '../../ads/remote_config_service.dart';
 import '../../prompts/text_to_image_prompts.dart';
 
 class ImageGenerationService {
-  static String get _apiKey => RemoteConfigService.getKieApiKey();
+  static String get _apiKey => RemoteConfigService.getKieApiKey(FeatureType.imageGeneration);
   static const String _baseUrl = 'https://api.kie.ai/api/v1';
 
   static const bool TESTING_MODE = false;

@@ -6,7 +6,7 @@ import '../../ads/remote_config_service.dart';
 /// Experimental Interior Service using JSON-based styles
 /// This is isolated and does NOT affect existing interior flows
 class InteriorExperimentService {
-  static String get _apiKey => RemoteConfigService.getApiFreeKey();
+  static String get _apiKey => RemoteConfigService.getApiFreeKey(FeatureType.interior);
   static const String _baseUrl = 'https://api.apifree.ai/v1';
   static const String _model = 'openai/gpt-image-1.5/edit';
 

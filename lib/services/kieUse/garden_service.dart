@@ -5,7 +5,7 @@ import '../../ads/remote_config_service.dart';
 import '../../prompts/garden_prompts.dart';
 
 class GardenService {
-  static String get _apiKey => RemoteConfigService.getKieApiKey();
+  static String get _apiKey => RemoteConfigService.getKieApiKey(FeatureType.garden);
   static const String _baseUrl = 'https://api.kie.ai/api/v1';
   static const String _model = 'flux-2/pro-image-to-image';
   
