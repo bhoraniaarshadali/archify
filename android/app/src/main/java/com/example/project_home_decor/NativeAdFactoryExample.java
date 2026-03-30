@@ -1,4 +1,4 @@
-package com.example.project_home_decor;
+package flut.testingapps.forallplans;
 
 import android.content.Context;
 import android.view.LayoutInflater;

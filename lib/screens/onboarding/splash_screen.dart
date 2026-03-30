@@ -10,6 +10,8 @@ import '../../services/helper/background_task_service.dart';
 import 'package:get/get.dart';
 import '../../services/remote_config_controller.dart';
 import '../../controllers/splash_screen_controller.dart'; // Import the new controller
+import '../../ads/ad_manager.dart';
+import '../../ads/app_state.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -67,6 +69,15 @@ class _SplashScreenState extends State<SplashScreen>
 
     final prefs = await SharedPreferences.getInstance();
     final introSeen = prefs.getBool('intro_seen') ?? false;
+
+    // 📢 PRELOAD: Trigger Intro Native Ad as early as possible on Splash
+    if (!introSeen && !AppState.isPremiumUser) {
+      if (!AdsManager.instance.initialized) {
+        AdsManager.instance.init();
+      } else {
+        AdsManager.instance.nativeIntroAd.loadAd(null);
+      }
+    }
 
     // Check Maintenance Mode
     final maintenanceMode = RemoteConfigService.getMaintenanceMode();

@@ -4,7 +4,8 @@ import '../reels/reels_screen.dart';
 import '../home/home_screen.dart';
 
 class ExploreScreen extends StatefulWidget {
-  const ExploreScreen({super.key});
+  final bool isVisible;
+  const ExploreScreen({super.key, this.isVisible = false});
 
   @override
   State<ExploreScreen> createState() => _ExploreScreenState();
@@ -41,7 +42,7 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
           TabBarView(
             controller: _tabController,
             children: [
-              const ReelsScreen(),
+              ReelsScreen(isActuallyVisible: widget.isVisible && _tabController.index == 0),
               _buildInspirationView(),
             ],
           ),

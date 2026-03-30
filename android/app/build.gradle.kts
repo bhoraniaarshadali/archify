@@ -9,7 +9,8 @@ plugins {
 }
 
 android {
-    namespace = "com.example.project_home_decor"
+    namespace = "flut.testingapps.forallplans"
+    //namespace = "com.example.project_home_decor"
     compileSdk = 36
     //buildToolsVersion = "36.0.0"
     // ndkVersion = flutter.ndkVersion  // Commented out to avoid NDK issues
@@ -27,7 +28,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.project_home_decor"
+        applicationId = "flut.testingapps.forallplans"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

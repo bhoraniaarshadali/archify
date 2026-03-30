@@ -1,4 +1,4 @@
-package com.example.project_home_decor;
+package flut.testingapps.forallplans;
 
 import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.FlutterEngine;

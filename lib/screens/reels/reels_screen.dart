@@ -10,7 +10,8 @@ import '../../ads/nativeAds/reel_native_ad_helper.dart';
 import 'reel_ad_item.dart';
 
 class ReelsScreen extends StatefulWidget {
-  const ReelsScreen({super.key});
+  final bool isActuallyVisible;
+  const ReelsScreen({super.key, this.isActuallyVisible = false});
 
   // Global mute state for the session
   static bool isGlobalMuted = false;
@@ -148,7 +149,7 @@ class _ReelsScreenState extends State<ReelsScreen> {
             return ReelItem(
               key: ValueKey('reel_$index'), // Unique key for each page
               videoUrl: _videoUrls[actualIndex],
-              isActive: index == _currentPage,
+              isActive: widget.isActuallyVisible && index == _currentPage,
               onMuteToggle: () {
                 setState(() {});
               },

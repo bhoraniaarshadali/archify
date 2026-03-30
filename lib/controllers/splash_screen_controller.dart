@@ -1,13 +1,14 @@
 import 'package:get/get.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
-import 'package:flutter/foundation.dart';
 import '../services/remote_config_controller.dart';
 import 'home_screen_controller.dart';
 import '../core/logger.dart'; // Import central logger
+import '../ads/app_state.dart';
+import '../utils/app_constant.dart';
 
 class SplashScreenController extends GetxController {
-  // Use a real entitlement key from RevenueCat dashboard
-  static const String entitlementKey = 'premium'; 
+  // Use the central entitlement key from AppConstant
+  static const String entitlementKey = AppConstant.entitlementKey; 
 
   Future<void> fetchPurchase() async {
     // Get instance of controllers
@@ -30,12 +31,14 @@ class SplashScreenController extends GetxController {
       // If the user has an active subscription
       if (entitlement != null && entitlement.isActive) {
         AdsVariable.isPurchase = true;
+        AppState.isPremiumUser = true; // Sync AppState
         AdsVariable.resetAdIds();
         homeScreenController.update(["full"]);
         splashScreenController.update(["full"]);
       } else {
         // Subscription is not active
         AdsVariable.isPurchase = false;
+        AppState.isPremiumUser = false; // Sync AppState
         homeScreenController.update(["full"]);
         splashScreenController.update(["full"]);
       }

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 import '../../services/daily_credit_manager.dart';
+import '../../utils/app_constant.dart';
+import '../../core/logger.dart';
 
 class PremiumModuleScreen extends StatefulWidget {
   final int initialTabIndex;
@@ -13,15 +16,11 @@ class _PremiumModuleScreenState extends State<PremiumModuleScreen> with SingleTi
   late TabController _tabController;
   int _selectedPremiumPlanIndex = 1; // 0 for Weekly, 1 for Yearly (Default)
   int _selectedCreditPackIndex = -1;
+  bool _isLoading = true;
 
-  final List<Map<String, dynamic>> _creditPacks = [
-    {'credits': 10, 'price': '\$1.99', 'badge': ''},
-    {'credits': 31, 'price': '\$4.99', 'badge': 'POPULAR'},
-    {'credits': 70, 'price': '\$9.99', 'badge': ''},
-    {'credits': 165, 'price': '\$19.99', 'badge': ''},
-    {'credits': 400, 'price': '\$39.99', 'badge': ''},
-    {'credits': 860, 'price': '\$56.99', 'badge': ''},
-  ];
+  Package? _weeklyPackage;
+  Package? _yearlyPackage;
+  List<Package> _creditPacksList = [];
 
   @override
   void initState() {
@@ -30,6 +29,49 @@ class _PremiumModuleScreenState extends State<PremiumModuleScreen> with SingleTi
     _tabController.addListener(() {
       if (mounted) setState(() {});
     });
+    _fetchOfferings();
+  }
+
+  Future<void> _fetchOfferings() async {
+    try {
+      Offerings offerings = await Purchases.getOfferings();
+      if (offerings.current != null) {
+        _creditPacksList.clear();
+        
+        // Use a Map to quickly look up packages by identifier
+        final Map<String, Package> packageMap = {
+          for (var pkg in offerings.current!.availablePackages) pkg.storeProduct.identifier: pkg
+        };
+
+        // Find subscription packages
+        _weeklyPackage = packageMap[AppConstant.weeklyIdentifier];
+        _yearlyPackage = packageMap[AppConstant.yearlyIdentifier];
+
+        // Explicitly build the 6-item grid list based on AppConstant identifiers
+        final coinIds = [
+          AppConstant.firstCoinIdentifier,
+          AppConstant.secondCoinIdentifier,
+          AppConstant.thirdCoinIdentifier,
+          AppConstant.fourthCoinIdentifier,
+          AppConstant.fifthCoinIdentifier,
+          AppConstant.sixthCoinIdentifier,
+        ];
+
+        for (var id in coinIds) {
+          if (packageMap.containsKey(id)) {
+            _creditPacksList.add(packageMap[id]!);
+          }
+        }
+      }
+    } catch (e) {
+      showLog("Error fetching offerings: $e");
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -38,34 +80,82 @@ class _PremiumModuleScreenState extends State<PremiumModuleScreen> with SingleTi
     super.dispose();
   }
 
+  Future<void> _buyPackage(Package package) async {
+    setState(() => _isLoading = true);
+    try {
+      final result = await Purchases.purchasePackage(package);
+      final customerInfo = result.customerInfo;
+      
+      // Check if the entitlement is active
+      if (customerInfo.entitlements.all[AppConstant.entitlementKey]?.isActive == true) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Purchase Successful!'), backgroundColor: Colors.green),
+          );
+          Navigator.pop(context);
+        }
+      } else {
+        // Handle non-subscription purchase (e.g. credits)
+        // You might need a separate way to detect if a consumable was successful if not using entitlements for it.
+        // Usually, if purchasePackage doesn't throw, it's successful.
+        if (mounted) {
+           ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Thank you for your purchase!'), backgroundColor: Colors.green),
+          );
+        }
+      }
+    } catch (e) {
+      showLog("Purchase error: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Purchase failed: $e'), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0D0D0D),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // 1. Top Banner Area
-            _buildTopBanner(),
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Column(
+              children: [
+                // 1. Top Banner Area
+                _buildTopBanner(),
 
-            // 2. Tab Switcher (Pills)
-            _buildTabSwitcher(),
+                // 2. Tab Switcher (Pills)
+                _buildTabSwitcher(),
 
-            // 3. Tab Content
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildCreditPlanTab(),
-                  _buildPremiumPlanTab(),
-                ],
+                // 3. Tab Content
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _buildCreditPlanTab(),
+                      _buildPremiumPlanTab(),
+                    ],
+                  ),
+                ),
+
+                // 4. Footer Links
+                _buildFooterLinks(),
+              ],
+            ),
+          ),
+          
+          if (_isLoading)
+            Container(
+              color: Colors.black54,
+              child: const Center(
+                child: CircularProgressIndicator(color: Colors.deepPurpleAccent),
               ),
             ),
-
-            // 4. Footer Links
-            _buildFooterLinks(),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -190,6 +280,10 @@ class _PremiumModuleScreenState extends State<PremiumModuleScreen> with SingleTi
   }
 
   Widget _buildCreditPlanTab() {
+    if (_creditPacksList.isEmpty && !_isLoading) {
+       return const Center(child: Text("No credit packs available", style: TextStyle(color: Colors.white70)));
+    }
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
       child: Column(
@@ -203,11 +297,22 @@ class _PremiumModuleScreenState extends State<PremiumModuleScreen> with SingleTi
                 mainAxisSpacing: 16,
                 childAspectRatio: 1.2,
               ),
-              itemCount: _creditPacks.length,
+              itemCount: _creditPacksList.length,
               itemBuilder: (context, index) {
-                final pack = _creditPacks[index];
-                final bool isPopular = pack['badge'] == 'POPULAR';
+                final package = _creditPacksList[index];
+                final product = package.storeProduct;
                 final bool isSelected = _selectedCreditPackIndex == index;
+                final bool isPopular = index == 1; // Assuming second item is popular as before
+
+                // Try to extract credits from ID: "some_id_300" -> "300"
+                String creditsStr = product.title.split(' ')[0];
+                final idParts = product.identifier.split('_');
+                if (idParts.isNotEmpty) {
+                  final lastPart = idParts.last;
+                  if (int.tryParse(lastPart) != null) {
+                    creditsStr = lastPart;
+                  }
+                }
 
                 return GestureDetector(
                   onTap: () => setState(() => _selectedCreditPackIndex = index),
@@ -252,7 +357,7 @@ class _PremiumModuleScreenState extends State<PremiumModuleScreen> with SingleTi
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                '${pack['credits']}',
+                                creditsStr,
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 28,
@@ -265,7 +370,7 @@ class _PremiumModuleScreenState extends State<PremiumModuleScreen> with SingleTi
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                pack['price'],
+                                product.priceString,
                                 style: const TextStyle(
                                   color: Colors.deepPurpleAccent,
                                   fontWeight: FontWeight.bold,
@@ -284,11 +389,15 @@ class _PremiumModuleScreenState extends State<PremiumModuleScreen> with SingleTi
           ),
           const SizedBox(height: 12),
           _buildActionButton(
-            label: "Get Credit",
+            label: "Buy Credits",
             onPressed: () {
-               ScaffoldMessenger.of(context).showSnackBar(
-                 const SnackBar(content: Text('Coming Soon'), duration: Duration(seconds: 1)),
-               );
+               if (_selectedCreditPackIndex >= 0) {
+                 _buyPackage(_creditPacksList[_selectedCreditPackIndex]);
+               } else {
+                 ScaffoldMessenger.of(context).showSnackBar(
+                   const SnackBar(content: Text('Please select a credit pack')),
+                 );
+               }
             },
           ),
         ],
@@ -301,28 +410,42 @@ class _PremiumModuleScreenState extends State<PremiumModuleScreen> with SingleTi
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
-          _buildPremiumCard(
-            index: 0,
-            title: "Weekly Plan",
-            reward: "50 Credits/week",
-            price: "\$2.99/week",
-            badge: "",
-          ),
+          if (_weeklyPackage != null)
+            _buildPremiumCard(
+              index: 0,
+              title: "Weekly Plan",
+              subTitle: _weeklyPackage!.storeProduct.title.split(' (').first,
+              reward: "Unlimited Access",
+              price: _weeklyPackage!.storeProduct.priceString,
+              badge: "",
+            ),
           const SizedBox(height: 16),
-          _buildPremiumCard(
-            index: 1,
-            title: "Yearly Plan",
-            reward: "300 Credits/week",
-            price: "\$17.55/year",
-            badge: "SAVE 40%",
-          ),
+          if (_yearlyPackage != null)
+            _buildPremiumCard(
+              index: 1,
+              title: "Yearly Plan",
+              subTitle: _yearlyPackage!.storeProduct.title.split(' (').first,
+              reward: "Premium Features",
+              price: _yearlyPackage!.storeProduct.priceString,
+              badge: "SAVE 40%",
+            ),
+            
+          if (_weeklyPackage == null && _yearlyPackage == null && !_isLoading)
+            const Center(child: Text("No subscription plans available", style: TextStyle(color: Colors.white70))),
+
           const Spacer(),
           _buildActionButton(
             label: "Subscribe Now",
             onPressed: () {
-               ScaffoldMessenger.of(context).showSnackBar(
-                 const SnackBar(content: Text('Coming Soon'), duration: Duration(seconds: 1)),
-               );
+               if (_selectedPremiumPlanIndex == 0 && _weeklyPackage != null) {
+                 _buyPackage(_weeklyPackage!);
+               } else if (_selectedPremiumPlanIndex == 1 && _yearlyPackage != null) {
+                 _buyPackage(_yearlyPackage!);
+               } else {
+                 ScaffoldMessenger.of(context).showSnackBar(
+                   const SnackBar(content: Text('Please select a plan')),
+                 );
+               }
             },
           ),
         ],
@@ -333,6 +456,7 @@ class _PremiumModuleScreenState extends State<PremiumModuleScreen> with SingleTi
   Widget _buildPremiumCard({
     required int index,
     required String title,
+    required String subTitle,
     required String reward,
     required String price,
     required String badge,
@@ -359,12 +483,27 @@ class _PremiumModuleScreenState extends State<PremiumModuleScreen> with SingleTi
                 children: [
                   Row(
                     children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              title,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            if (subTitle.isNotEmpty)
+                              Text(
+                                subTitle,
+                                style: const TextStyle(
+                                  color: Colors.white38,
+                                  fontSize: 10, // Small subtitle
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                       if (badge.isNotEmpty) ...[
@@ -455,17 +594,47 @@ class _PremiumModuleScreenState extends State<PremiumModuleScreen> with SingleTi
     );
   }
 
+  Future<void> _restorePurchases() async {
+    setState(() => _isLoading = true);
+    try {
+      CustomerInfo customerInfo = await Purchases.restorePurchases();
+      if (customerInfo.entitlements.all[AppConstant.entitlementKey]?.isActive == true) {
+        if (mounted) {
+           ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Purchases Restored!'), backgroundColor: Colors.green),
+          );
+           Navigator.pop(context);
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No active subscriptions found.')),
+          );
+        }
+      }
+    } catch (e) {
+      showLog("Restore error: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Restore failed: $e'), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   Widget _buildFooterLinks() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 24),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
-          _FooterLink(label: 'Terms of use'),
-          _FooterLinkSpacer(),
-          _FooterLink(label: 'Privacy Policy'),
-          _FooterLinkSpacer(),
-          _FooterLink(label: 'Restore'),
+        children: [
+          _FooterLink(label: 'Terms of use', onTap: () {}),
+          const _FooterLinkSpacer(),
+          _FooterLink(label: 'Privacy Policy', onTap: () {}),
+          const _FooterLinkSpacer(),
+          _FooterLink(label: 'Restore', onTap: _restorePurchases),
         ],
       ),
     );
@@ -474,13 +643,17 @@ class _PremiumModuleScreenState extends State<PremiumModuleScreen> with SingleTi
 
 class _FooterLink extends StatelessWidget {
   final String label;
-  const _FooterLink({required this.label});
+  final VoidCallback onTap;
+  const _FooterLink({required this.label, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      label,
-      style: const TextStyle(color: Colors.white38, fontSize: 11),
+    return GestureDetector(
+      onTap: onTap,
+      child: Text(
+        label,
+        style: const TextStyle(color: Colors.white38, fontSize: 11),
+      ),
     );
   }
 }

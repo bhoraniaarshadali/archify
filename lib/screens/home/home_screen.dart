@@ -27,12 +27,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   int _selectedIndex = 0;
   late AnimationController _bottomNavAnim;
 
-  // Use a List of widgets to maintain state via IndexedStack
-  final List<Widget> _screens = const [
-    _HomeWrapper(),
-    AssistantsScreen(),
-    ExploreScreen(),
-    MyCreationsScreen(),
+  // Removed static const _screens to allow dynamic visibility passing
+  List<Widget> get _screens => [
+    const _HomeWrapper(),
+    const AssistantsScreen(),
+    ExploreScreen(isVisible: _selectedIndex == 2),
+    const MyCreationsScreen(),
   ];
 
   @override
