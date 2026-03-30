@@ -200,9 +200,25 @@ class RemoteConfigService {
   static String getInterstitialAdId() => _json()['interstitialAd_id']?.toString() ?? '';
   static String getRewardedAdId() => _json()['rewardAd_id']?.toString() ?? '';
 
+  // 📺 REEL ADS
+  static String getNativeReelAdId() {
+    final adId = _json()['nativeAd_reelAd_id']?.toString() ?? '';
+    // Use test id if not defined, unless "11" (disabled)
+    if (adId.isEmpty) return "ca-app-pub-3940256099942544/2247696110";
+    return adId;
+  }
+
+  static int getReelAdFrequency() {
+    return _json()['native_reel_frequency'] ?? 2;
+  }
+
   static bool isAdsGloballyDisabled() {
     final config = _json();
     return config['nativeAd_id']?.toString() == '11' || config['interstitialAd_id']?.toString() == '11';
+  }
+
+  static bool isReelAdsDisabled() {
+    return getNativeReelAdId() == "11";
   }
 
   // 📊 AD FREQUENCY

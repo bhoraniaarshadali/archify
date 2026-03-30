@@ -6,6 +6,8 @@ import '../../navigation/app_navigator.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../creations/my_creations_screen.dart';
+import 'privacy_policy_screen.dart';
+import 'terms_of_use_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -151,7 +153,13 @@ class SettingsScreen extends StatelessWidget {
                 context,
                 icon: Icons.policy_outlined,
                 title: 'Privacy Policy',
-                onTap: () => _launchURL('https://example.com/privacy'),
+                onTap: () => AppNavigator.push(context, const PrivacyPolicyScreen()),
+              ),
+              _buildSettingsTile(
+                context,
+                icon: Icons.description_outlined,
+                title: 'Terms of Use',
+                onTap: () => AppNavigator.push(context, const TermsOfUseScreen()),
               ),
               _buildSettingsTile(
                 context,

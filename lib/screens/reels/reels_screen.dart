@@ -5,6 +5,9 @@ import 'package:video_player/video_player.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:gal/gal.dart';
 import '../../services/remote_config_controller.dart';
+import '../../ads/remote_config_service.dart';
+import '../../ads/nativeAds/reel_native_ad_helper.dart';
+import 'reel_ad_item.dart';
 
 class ReelsScreen extends StatefulWidget {
   const ReelsScreen({super.key});
@@ -23,13 +26,40 @@ class _ReelsScreenState extends State<ReelsScreen> {
 
   List<String> get _videoUrls => _remoteConfigController.adsVariable.value.reelsUrls;
 
+  // 📺 Ad Logic
+  late int _adFrequency;
+  // Use a map to store ad helpers for specific positions to ensure they persist while scrolling
+  final Map<int, ReelNativeAdHelper> _adHelpers = {};
+
   @override
   void initState() {
     super.initState();
+    _adFrequency = RemoteConfigService.getReelAdFrequency();
     // Initial preload of the first few videos
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _preloadVideos(0);
+      _preloadAds(0);
     });
+  }
+
+  void _preloadAds(int currentIndex) {
+    if (RemoteConfigService.isReelAdsDisabled()) return;
+
+    // Preload next 2 ad slots
+    // If freq = 2, slots are 2, 5, 8...
+    // Current slot index: (currentIndex + 1) ~/ (_adFrequency + 1)
+    int currentSlotGroup = (currentIndex + 1) ~/ (_adFrequency + 1);
+
+    for (int i = 1; i <= 2; i++) {
+       int nextAdSlotIndex = (currentSlotGroup + i) * (_adFrequency + 1) - 1;
+       
+       if (nextAdSlotIndex > 0 && !_adHelpers.containsKey(nextAdSlotIndex)) {
+         debugPrint('🚀 Preloading Reel Ad at index $nextAdSlotIndex');
+         final helper = ReelNativeAdHelper();
+         helper.loadAd(() {});
+         _adHelpers[nextAdSlotIndex] = helper;
+       }
+    }
   }
 
   void _preloadVideos(int currentIndex) {
@@ -39,10 +69,15 @@ class _ReelsScreenState extends State<ReelsScreen> {
     for (int i = currentIndex + 1; i <= currentIndex + 3; i++) {
       final actualIndex = i % _videoUrls.length;
       final url = _videoUrls[actualIndex];
-      // Trigger cache download without waiting for it
-      DefaultCacheManager().getSingleFile(url).catchError((e) {
-        debugPrint('Preload error for $url: $e');
-      });
+      _safePreload(url);
+    }
+  }
+
+  Future<void> _safePreload(String url) async {
+    try {
+      await DefaultCacheManager().getSingleFile(url);
+    } catch (e) {
+      debugPrint('Preload error for $url: $e');
     }
   }
 
@@ -70,9 +105,46 @@ class _ReelsScreenState extends State<ReelsScreen> {
               _currentPage = index;
             });
             _preloadVideos(index);
+            _preloadAds(index);
           },
           itemBuilder: (context, index) {
-            final actualIndex = index % _videoUrls.length;
+            // 🪙 Ad Logic: Show ad after frequency
+            // Formula: every (freq + 1) items is an ad slot.
+            // Example freq=2, slots = 2, 5, 8, 11...
+            // If freq=2, we want: Reel(0), Reel(1), Ad(2), Reel(3), Reel(4), Ad(5)...
+            
+            final bool isAdSlot = index > 0 && (index + 1) % (_adFrequency + 1) == 0;
+
+            if (isAdSlot && !RemoteConfigService.isReelAdsDisabled()) {
+              if (!_adHelpers.containsKey(index)) {
+                _adHelpers[index] = ReelNativeAdHelper()..loadAd(() {
+                  if (mounted && _currentPage == index) setState(() {});
+                });
+              }
+
+              final helper = _adHelpers[index]!;
+              
+              // If ad failed, automatically skip to next reel (per requirement)
+              if (helper.lastError != null) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (_currentPage == index) {
+                    _pageController.nextPage(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  }
+                });
+                return const SizedBox.shrink();
+              }
+
+              return ReelAdItem(adHelper: helper);
+            }
+
+            // Calculate actual video index
+            // Subtract number of ad slots before this index
+            final int adSlotsBefore = (index + 1) ~/ (_adFrequency + 1);
+            final int actualIndex = (index - adSlotsBefore) % _videoUrls.length;
+
             return ReelItem(
               key: ValueKey('reel_$index'), // Unique key for each page
               videoUrl: _videoUrls[actualIndex],
@@ -85,6 +157,15 @@ class _ReelsScreenState extends State<ReelsScreen> {
         );
       }),
     );
+  }
+
+  @override
+  void dispose() {
+    for (var helper in _adHelpers.values) {
+      helper.dispose();
+    }
+    _pageController.dispose();
+    super.dispose();
   }
 }
 

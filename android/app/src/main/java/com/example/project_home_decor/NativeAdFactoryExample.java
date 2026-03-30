@@ -29,59 +29,78 @@ public class NativeAdFactoryExample implements GoogleMobileAdsPlugin.NativeAdFac
             NativeAd nativeAd,
             Map<String, Object> customOptions) {
 
+        String layoutId = (customOptions != null) ? (String) customOptions.get("layoutType") : null;
+        int layoutResId = R.layout.native_ad_intro_layout; // Default
+
+        if ("reel".equals(layoutId)) {
+            layoutResId = R.layout.native_reel_ad_layout;
+        }
+
         NativeAdView adView = (NativeAdView) LayoutInflater.from(context)
-                .inflate(R.layout.native_ad_layout, null);
+                .inflate(layoutResId, null);
 
         // Views
         TextView headline = adView.findViewById(R.id.ad_headline);
         TextView body = adView.findViewById(R.id.ad_body);
         Button cta = adView.findViewById(R.id.ad_call_to_action);
         ImageView icon = adView.findViewById(R.id.ad_app_icon);
-        RatingBar ratingBar = adView.findViewById(R.id.ad_stars);
+        RatingBar ratingBar = adView.findViewById(R.id.ad_stars); // May be null in reel layout
         MediaView mediaView = adView.findViewById(R.id.native_ad_media);
 
         // HEADLINE (REQUIRED)
-        headline.setText(nativeAd.getHeadline());
-        adView.setHeadlineView(headline);
+        if (headline != null) {
+            headline.setText(nativeAd.getHeadline());
+            adView.setHeadlineView(headline);
+        }
 
         // BODY
-        if (nativeAd.getBody() != null) {
-            body.setText(nativeAd.getBody());
-            body.setVisibility(View.VISIBLE);
-            adView.setBodyView(body);
-        } else {
-            body.setVisibility(View.GONE);
+        if (body != null) {
+            if (nativeAd.getBody() != null) {
+                body.setText(nativeAd.getBody());
+                body.setVisibility(View.VISIBLE);
+                adView.setBodyView(body);
+            } else {
+                body.setVisibility(View.GONE);
+            }
         }
 
         // CTA
-        if (nativeAd.getCallToAction() != null) {
-            cta.setText(nativeAd.getCallToAction());
-            cta.setVisibility(View.VISIBLE);
-            adView.setCallToActionView(cta);
-        } else {
-            cta.setVisibility(View.GONE);
+        if (cta != null) {
+            if (nativeAd.getCallToAction() != null) {
+                cta.setText(nativeAd.getCallToAction());
+                cta.setVisibility(View.VISIBLE);
+                adView.setCallToActionView(cta);
+            } else {
+                cta.setVisibility(View.GONE);
+            }
         }
 
         // ICON
-        if (nativeAd.getIcon() != null) {
-            icon.setImageDrawable(nativeAd.getIcon().getDrawable());
-            icon.setVisibility(View.VISIBLE);
-            adView.setIconView(icon);
-        } else {
-            icon.setVisibility(View.GONE);
+        if (icon != null) {
+            if (nativeAd.getIcon() != null) {
+                icon.setImageDrawable(nativeAd.getIcon().getDrawable());
+                icon.setVisibility(View.VISIBLE);
+                adView.setIconView(icon);
+            } else {
+                icon.setVisibility(View.GONE);
+            }
         }
 
-        // RATING
-        if (nativeAd.getStarRating() != null) {
-            ratingBar.setRating(nativeAd.getStarRating().floatValue());
-            ratingBar.setVisibility(View.VISIBLE);
-            adView.setStarRatingView(ratingBar);
-        } else {
-            ratingBar.setVisibility(View.GONE);
+        // RATING (Optional)
+        if (ratingBar != null) {
+            if (nativeAd.getStarRating() != null) {
+                ratingBar.setRating(nativeAd.getStarRating().floatValue());
+                ratingBar.setVisibility(View.VISIBLE);
+                adView.setStarRatingView(ratingBar);
+            } else {
+                ratingBar.setVisibility(View.GONE);
+            }
         }
 
         // MEDIA
-        adView.setMediaView(mediaView);
+        if (mediaView != null) {
+            adView.setMediaView(mediaView);
+        }
 
         // FINAL REQUIRED CALL
         adView.setNativeAd(nativeAd);

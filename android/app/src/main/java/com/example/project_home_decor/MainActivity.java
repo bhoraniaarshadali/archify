@@ -15,6 +15,11 @@ public class MainActivity extends FlutterActivity {
                 flutterEngine,
                 "listTile", // MUST match Flutter NativeAd.factoryId
                 new NativeAdFactoryExample(this));
+
+        GoogleMobileAdsPlugin.registerNativeAdFactory(
+                flutterEngine,
+                "reelsAd",
+                new NativeAdFactoryExample(this));
     }
 
     @Override
@@ -23,6 +28,9 @@ public class MainActivity extends FlutterActivity {
         GoogleMobileAdsPlugin.unregisterNativeAdFactory(
                 flutterEngine,
                 "listTile");
+        GoogleMobileAdsPlugin.unregisterNativeAdFactory(
+                flutterEngine,
+                "reelsAd");
         super.cleanUpFlutterEngine(flutterEngine);
     }
 }

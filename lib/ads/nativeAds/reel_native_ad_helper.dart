@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart' hide AppState;
 import '../remote_config_service.dart';
-
 import '../app_state.dart';
 
-class NativeAdHelper extends ChangeNotifier {
+class ReelNativeAdHelper extends ChangeNotifier {
   NativeAd? nativeAd;
   bool isAdLoaded = false;
   bool isAdLoading = false;
@@ -13,16 +12,19 @@ class NativeAdHelper extends ChangeNotifier {
   void loadAd(VoidCallback? onLoaded) {
     if (isAdLoaded || nativeAd != null || isAdLoading) return;
 
-    final unitId = RemoteConfigService.getNativeAdId();
+    if (RemoteConfigService.isReelAdsDisabled()) {
+       debugPrint('⚠️ ReelNativeAdHelper: Reel Ads are disabled remotely.');
+       return;
+    }
+
+    final unitId = RemoteConfigService.getNativeReelAdId();
     if (unitId.isEmpty) {
-      debugPrint(
-        '⚠️ NativeAdHelper: Ad Unit ID is empty. Check Remote Config.',
-      );
+      debugPrint('⚠️ ReelNativeAdHelper: Ad Unit ID is empty.');
       return;
     }
 
     if (!AppState.canLoadAds) {
-      debugPrint('⚠️ NativeAdHelper: canLoadAds is false. Check AppState.');
+      debugPrint('⚠️ ReelNativeAdHelper: canLoadAds is false.');
       return;
     }
 
@@ -31,12 +33,12 @@ class NativeAdHelper extends ChangeNotifier {
 
     nativeAd = NativeAd(
       adUnitId: unitId,
-      factoryId: 'listTile',
-      customOptions: {'layoutType': 'intro'},
+      factoryId: 'reelsAd',
+      customOptions: {'layoutType': 'reel'},
       request: const AdRequest(),
       listener: NativeAdListener(
         onAdLoaded: (ad) {
-          debugPrint('✅ NativeAdHelper: Ad Loaded Successfully');
+          debugPrint('✅ ReelNativeAdHelper: Ad Loaded Successfully');
           isAdLoaded = true;
           isAdLoading = false;
           AppState.adLoadFailed = false;
@@ -45,7 +47,7 @@ class NativeAdHelper extends ChangeNotifier {
           notifyListeners();
         },
         onAdFailedToLoad: (ad, error) {
-          debugPrint('❌ NativeAdHelper: Ad Failed to Load: ${error.message}');
+          debugPrint('❌ ReelNativeAdHelper: Ad Failed to Load: ${error.message}');
           ad.dispose();
           nativeAd = null;
           isAdLoaded = false;
