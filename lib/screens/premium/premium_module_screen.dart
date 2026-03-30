@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:in_app_purchase/in_app_purchase.dart';
-import '../../ads/app_state.dart';
-import '../../services/premium/billing_service.dart';
 import '../../services/daily_credit_manager.dart';
 
 class PremiumModuleScreen extends StatefulWidget {
@@ -14,11 +11,25 @@ class PremiumModuleScreen extends StatefulWidget {
 
 class _PremiumModuleScreenState extends State<PremiumModuleScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  int _selectedPremiumPlanIndex = 1; // 0 for Weekly, 1 for Yearly (Default)
+  int _selectedCreditPackIndex = -1;
+
+  final List<Map<String, dynamic>> _creditPacks = [
+    {'credits': 10, 'price': '\$1.99', 'badge': ''},
+    {'credits': 31, 'price': '\$4.99', 'badge': 'POPULAR'},
+    {'credits': 70, 'price': '\$9.99', 'badge': ''},
+    {'credits': 165, 'price': '\$19.99', 'badge': ''},
+    {'credits': 400, 'price': '\$39.99', 'badge': ''},
+    {'credits': 860, 'price': '\$56.99', 'badge': ''},
+  ];
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this, initialIndex: widget.initialTabIndex);
+    _tabController.addListener(() {
+      if (mounted) setState(() {});
+    });
   }
 
   @override
@@ -30,457 +41,458 @@ class _PremiumModuleScreenState extends State<PremiumModuleScreen> with SingleTi
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFDFBFF),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.close_rounded, color: Colors.black, size: 28),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Premium Center',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: Colors.deepPurple,
-          unselectedLabelColor: Colors.grey,
-          indicatorColor: Colors.deepPurple,
-          indicatorWeight: 3,
-          tabs: const [
-            Tab(text: 'Subscriptions'),
-            Tab(text: 'Credits'),
+      backgroundColor: const Color(0xFF0D0D0D),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // 1. Top Banner Area
+            _buildTopBanner(),
+
+            // 2. Tab Switcher (Pills)
+            _buildTabSwitcher(),
+
+            // 3. Tab Content
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildCreditPlanTab(),
+                  _buildPremiumPlanTab(),
+                ],
+              ),
+            ),
+
+            // 4. Footer Links
+            _buildFooterLinks(),
           ],
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          const SubscriptionPlansTab(),
-          CreditPurchaseTab(onUpgradeRequest: () {
-            _tabController.animateTo(0);
-          }),
-        ],
-      ),
-    );
-  }
-}
-
-class SubscriptionPlansTab extends StatefulWidget {
-  const SubscriptionPlansTab({super.key});
-
-  @override
-  State<SubscriptionPlansTab> createState() => _SubscriptionPlansTabState();
-}
-
-class _SubscriptionPlansTabState extends State<SubscriptionPlansTab> {
-  List<ProductDetails> _products = [];
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchProducts();
-  }
-
-  Future<void> _fetchProducts() async {
-    final products = await BillingService().getProducts({
-      BillingService.planStandard,
-      BillingService.planPremium,
-      BillingService.planArchitect,
-    });
-    if (mounted) {
-      setState(() {
-        _products = products;
-        _isLoading = false;
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    // Sort products based on price or custom logic
-    _products.sort((a, b) => a.rawPrice.compareTo(b.rawPrice));
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        children: [
-          const Text(
-            'Choose Your Plan',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          ..._products.map((product) {
-            PlanTier tier = PlanTier.free;
-            String title = product.title.split('(').first.trim();
-            Color color = Colors.blue.shade700;
-            List<String> features = [];
-            bool isBestValue = false;
-
-            if (product.id == BillingService.planStandard) {
-              tier = PlanTier.standard;
-              features = ['HD Quality', 'Basic Styles', 'Ad-Free'];
-            } else if (product.id == BillingService.planPremium) {
-              tier = PlanTier.premium;
-              features = ['Ultra-HD Quality', 'All Styles', 'Priority Queue', 'Ad-Free'];
-              color = Colors.deepPurple.shade700;
-              isBestValue = true;
-            } else if (product.id == BillingService.planArchitect) {
-              tier = PlanTier.architect;
-              features = ['Commercial License', '4K Renders', 'Unlimited Credits', '24/7 Support'];
-              color = Colors.indigo.shade900;
-            }
-
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 16.0),
-              child: _buildPlanCard(
-                context,
-                tier: tier,
-                title: title,
-                price: product.price,
-                features: features,
-                color: color,
-                isBestValue: isBestValue,
-                product: product,
-              ),
-            );
-          }),
-          if (_products.isEmpty)
-            const Text('No plans available at the moment. Please try again later.'),
-        ],
-      ),
     );
   }
 
-  Widget _buildPlanCard(
-    BuildContext context, {
-    required PlanTier tier,
-    required String title,
-    required String price,
-    required List<String> features,
-    required Color color,
-    required ProductDetails product,
-    bool isBestValue = false,
-  }) {
-    return ListenableBuilder(
-      listenable: AppState(),
-      builder: (context, _) {
-        final bool isCurrent = AppState.planTier == tier;
-
-        return Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: color.withOpacity(0.3),
-                blurRadius: 15,
-                offset: const Offset(0, 8),
-              ),
-            ],
+  Widget _buildTopBanner() {
+    return Container(
+      width: double.infinity,
+      height: 180,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.deepPurple.withOpacity(0.35),
+            const Color(0xFF0D0D0D),
+          ],
+        ),
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            top: 10,
+            left: 10,
+            child: IconButton(
+              icon: const Icon(Icons.close, color: Colors.white, size: 28),
+              onPressed: () => Navigator.pop(context),
+            ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white12,
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  if (isBestValue)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Text(
-                        'Best Value',
-                        style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                price,
-                style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900),
-              ),
-              const Divider(color: Colors.white24, height: 32),
-              ...features.map((f) => Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.check_circle_outline, color: Colors.white70, size: 18),
-                        const SizedBox(width: 8),
-                        Text(f, style: const TextStyle(color: Colors.white, fontSize: 14)),
-                      ],
-                    ),
-                  )),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: isCurrent
-                      ? null
-                      : () => BillingService().buyProduct(product),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: color,
-                    disabledBackgroundColor: Colors.white.withOpacity(0.3),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  child: Text(
-                    isCurrent ? 'Current Plan' : 'Subscribe',
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  child: const Icon(
+                    Icons.auto_awesome_rounded,
+                    size: 40,
+                    color: Colors.deepPurpleAccent,
                   ),
                 ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class CreditPurchaseTab extends StatefulWidget {
-  final VoidCallback onUpgradeRequest;
-  const CreditPurchaseTab({super.key, required this.onUpgradeRequest});
-
-  @override
-  State<CreditPurchaseTab> createState() => _CreditPurchaseTabState();
-}
-
-class _CreditPurchaseTabState extends State<CreditPurchaseTab> {
-  List<ProductDetails> _creditProducts = [];
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchProducts();
-  }
-
-  Future<void> _fetchProducts() async {
-    final products = await BillingService().getProducts({
-      BillingService.creditsSmall,
-      BillingService.creditsMedium,
-      BillingService.creditsLarge,
-    });
-    if (mounted) {
-      setState(() {
-        _creditProducts = products;
-        _isLoading = false;
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: AppState(),
-      builder: (context, _) {
-        final tier = AppState.planTier;
-        final bool canBuy = tier == PlanTier.premium || tier == PlanTier.architect;
-
-        if (!canBuy) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(40),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(Icons.lock_outline_rounded, size: 64, color: Colors.grey.shade400),
-                  ),
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Exclusive Feature',
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Credit purchasing is only available for Premium and Architect members.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey, fontSize: 16),
-                  ),
-                  const SizedBox(height: 32),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: ElevatedButton(
-                      onPressed: widget.onUpgradeRequest,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.deepPurple,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                const SizedBox(height: 12),
+                ValueListenableBuilder<int>(
+                  valueListenable: DailyCreditManager.creditsNotifier,
+                  builder: (context, credits, _) {
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(100),
+                        border: Border.all(color: Colors.white10),
                       ),
-                      child: const Text('Upgrade Now', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-
-        if (_isLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        return _buildCreditStore();
-      },
-    );
-  }
-
-  Widget _buildCreditStore() {
-    _creditProducts.sort((a, b) => a.rawPrice.compareTo(b.rawPrice));
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Refill Credits',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  const Text(
-                    'Keep generating without waiting',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                ],
-              ),
-              ValueListenableBuilder<int>(
-                valueListenable: DailyCreditManager.creditsNotifier,
-                builder: (context, credits, _) {
-                  return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: Colors.amber.shade100,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.bolt_rounded, color: Colors.amber, size: 18),
-                        const SizedBox(width: 4),
-                        Text(
-                          '$credits',
-                          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.orange),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          ..._creditProducts.map((product) {
-            String title = 'Starter Pack';
-            int credits = 0;
-            bool isRecommended = false;
-
-            if (product.id == BillingService.creditsSmall) {
-              title = 'Small Pack';
-              credits = 50;
-            } else if (product.id == BillingService.creditsMedium) {
-              title = 'Medium Pack';
-              credits = 150;
-              isRecommended = true;
-            } else if (product.id == BillingService.creditsLarge) {
-              title = 'Large Pack';
-              credits = 500;
-            }
-
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 16.0),
-              child: _buildCoinPack(
-                title: title,
-                credits: credits,
-                price: product.price,
-                isRecommended: isRecommended,
-                product: product,
-              ),
-            );
-          }),
-          if (_creditProducts.isEmpty)
-            const Text('No credit packs available.'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCoinPack({
-    required String title,
-    required int credits,
-    required String price,
-    required ProductDetails product,
-    bool isRecommended = false,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: isRecommended ? Colors.deepPurple : Colors.grey.shade200, width: 2),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.amber.shade50,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.bolt_rounded, color: Colors.amber, size: 28),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                Text('$credits Credits', style: TextStyle(color: Colors.grey.shade600)),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.bolt_rounded, color: Colors.amber, size: 20),
+                          const SizedBox(width: 6),
+                          Text(
+                            '$credits Credits Balance',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
           ),
-          ElevatedButton(
-            onPressed: () => BillingService().buyProduct(product),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: isRecommended ? Colors.deepPurple : Colors.grey.shade100,
-              foregroundColor: isRecommended ? Colors.white : Colors.black,
-              elevation: 0,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabSwitcher() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(100),
+      ),
+      child: Row(
+        children: [
+          _buildTabPill('Credit Plan', 0),
+          _buildTabPill('Premium Plan', 1),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabPill(String label, int index) {
+    final isSelected = _tabController.index == index;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => _tabController.animateTo(index),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(100),
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: isSelected ? Colors.black : Colors.grey,
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
             ),
-            child: Text(price, style: const TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCreditPlanTab() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+      child: Column(
+        children: [
+          Expanded(
+            child: GridView.builder(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                childAspectRatio: 1.2,
+              ),
+              itemCount: _creditPacks.length,
+              itemBuilder: (context, index) {
+                final pack = _creditPacks[index];
+                final bool isPopular = pack['badge'] == 'POPULAR';
+                final bool isSelected = _selectedCreditPackIndex == index;
+
+                return GestureDetector(
+                  onTap: () => setState(() => _selectedCreditPackIndex = index),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1A1A1A),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isSelected 
+                            ? Colors.deepPurpleAccent 
+                            : (isPopular ? Colors.deepPurpleAccent.withOpacity(0.5) : Colors.white10),
+                        width: isSelected || isPopular ? 2 : 1,
+                      ),
+                    ),
+                    child: Stack(
+                      children: [
+                        if (isPopular)
+                          Positioned(
+                            top: 0,
+                            right: 0,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: const BoxDecoration(
+                                color: Colors.deepPurpleAccent,
+                                borderRadius: BorderRadius.only(
+                                  topRight: Radius.circular(18),
+                                  bottomLeft: Radius.circular(14),
+                                ),
+                              ),
+                              child: const Text(
+                                'POPULAR',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 8,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                '${pack['credits']}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const Text(
+                                'Credits',
+                                style: TextStyle(color: Colors.white70, fontSize: 13),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                pack['price'],
+                                style: const TextStyle(
+                                  color: Colors.deepPurpleAccent,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 12),
+          _buildActionButton(
+            label: "Get Credit",
+            onPressed: () {
+               ScaffoldMessenger.of(context).showSnackBar(
+                 const SnackBar(content: Text('Coming Soon'), duration: Duration(seconds: 1)),
+               );
+            },
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildPremiumPlanTab() {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        children: [
+          _buildPremiumCard(
+            index: 0,
+            title: "Weekly Plan",
+            reward: "50 Credits/week",
+            price: "\$2.99/week",
+            badge: "",
+          ),
+          const SizedBox(height: 16),
+          _buildPremiumCard(
+            index: 1,
+            title: "Yearly Plan",
+            reward: "300 Credits/week",
+            price: "\$17.55/year",
+            badge: "SAVE 40%",
+          ),
+          const Spacer(),
+          _buildActionButton(
+            label: "Subscribe Now",
+            onPressed: () {
+               ScaffoldMessenger.of(context).showSnackBar(
+                 const SnackBar(content: Text('Coming Soon'), duration: Duration(seconds: 1)),
+               );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPremiumCard({
+    required int index,
+    required String title,
+    required String reward,
+    required String price,
+    required String badge,
+  }) {
+    final bool isSelected = _selectedPremiumPlanIndex == index;
+
+    return GestureDetector(
+      onTap: () => setState(() => _selectedPremiumPlanIndex = index),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1A1A1A),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: isSelected ? Colors.deepPurpleAccent : Colors.white10,
+            width: 2,
+          ),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      if (badge.isNotEmpty) ...[
+                        const SizedBox(width: 10),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.green.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            badge,
+                            style: const TextStyle(
+                              color: Colors.green,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    reward,
+                    style: const TextStyle(color: Colors.white70, fontSize: 14),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    price,
+                    style: const TextStyle(
+                      color: Colors.deepPurpleAccent,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected ? Colors.deepPurpleAccent : Colors.white30,
+                  width: 2,
+                ),
+                color: isSelected ? Colors.deepPurpleAccent : Colors.transparent,
+              ),
+              child: isSelected 
+                  ? const Icon(Icons.check, color: Colors.white, size: 14) 
+                  : null,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton({required String label, required VoidCallback onPressed}) {
+    return Container(
+      width: double.infinity,
+      height: 64,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.deepPurpleAccent.withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.deepPurpleAccent,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          elevation: 0,
+        ),
+        child: Text(
+          label,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFooterLinks() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const [
+          _FooterLink(label: 'Terms of use'),
+          _FooterLinkSpacer(),
+          _FooterLink(label: 'Privacy Policy'),
+          _FooterLinkSpacer(),
+          _FooterLink(label: 'Restore'),
+        ],
+      ),
+    );
+  }
+}
+
+class _FooterLink extends StatelessWidget {
+  final String label;
+  const _FooterLink({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      label,
+      style: const TextStyle(color: Colors.white38, fontSize: 11),
+    );
+  }
+}
+
+class _FooterLinkSpacer extends StatelessWidget {
+  const _FooterLinkSpacer();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(horizontal: 8),
+      child: Text('|', style: TextStyle(color: Colors.white10, fontSize: 11)),
     );
   }
 }

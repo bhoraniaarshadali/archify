@@ -8,7 +8,7 @@ import 'ai_tools_dashboard.dart';
 import '../../widgets/daily_credit_badge.dart';
 
 import '../assistants/assistants_screen.dart';
-import '../premium/premium_screen.dart';
+import '../premium/premium_module_screen.dart';
 import '../settings/settings_screen.dart';
 import '../../navigation/app_navigator.dart';
 import '../../ads/app_state.dart';
@@ -214,7 +214,7 @@ class _HomeWrapper extends StatelessWidget {
             builder: (context, _) {
               if (AppState.isPremiumUser) return const SizedBox.shrink();
               return GestureDetector(
-                onTap: () => AppNavigator.push(context, const PremiumScreen()),
+                onTap: () => AppNavigator.push(context, const PremiumModuleScreen()),
                 child: Container(
                   margin: const EdgeInsets.symmetric(vertical: 12),
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
