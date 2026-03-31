@@ -13,8 +13,8 @@ class ReelNativeAdHelper extends ChangeNotifier {
     if (isAdLoaded || nativeAd != null || isAdLoading) return;
 
     if (RemoteConfigService.isReelAdsDisabled()) {
-       debugPrint('⚠️ ReelNativeAdHelper: Reel Ads are disabled remotely.');
-       return;
+      debugPrint('⚠️ ReelNativeAdHelper: Reel Ads are disabled remotely.');
+      return;
     }
 
     final unitId = RemoteConfigService.getNativeReelAdId();
@@ -47,7 +47,9 @@ class ReelNativeAdHelper extends ChangeNotifier {
           notifyListeners();
         },
         onAdFailedToLoad: (ad, error) {
-          debugPrint('❌ ReelNativeAdHelper: Ad Failed to Load: ${error.message}');
+          debugPrint(
+            '❌ ReelNativeAdHelper: Ad Failed to Load: ${error.message}',
+          );
           ad.dispose();
           nativeAd = null;
           isAdLoaded = false;

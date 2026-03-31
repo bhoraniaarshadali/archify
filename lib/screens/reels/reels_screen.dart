@@ -22,10 +22,12 @@ class ReelsScreen extends StatefulWidget {
 
 class _ReelsScreenState extends State<ReelsScreen> {
   final PageController _pageController = PageController();
-  final RemoteConfigController _remoteConfigController = Get.find<RemoteConfigController>();
+  final RemoteConfigController _remoteConfigController =
+      Get.find<RemoteConfigController>();
   int _currentPage = 0;
 
-  List<String> get _videoUrls => _remoteConfigController.adsVariable.value.reelsUrls;
+  List<String> get _videoUrls =>
+      _remoteConfigController.adsVariable.value.reelsUrls;
 
   // 📺 Ad Logic
   late int _adFrequency;
@@ -52,20 +54,20 @@ class _ReelsScreenState extends State<ReelsScreen> {
     int currentSlotGroup = (currentIndex + 1) ~/ (_adFrequency + 1);
 
     for (int i = 1; i <= 2; i++) {
-       int nextAdSlotIndex = (currentSlotGroup + i) * (_adFrequency + 1) - 1;
-       
-       if (nextAdSlotIndex > 0 && !_adHelpers.containsKey(nextAdSlotIndex)) {
-         debugPrint('🚀 Preloading Reel Ad at index $nextAdSlotIndex');
-         final helper = ReelNativeAdHelper();
-         helper.loadAd(() {});
-         _adHelpers[nextAdSlotIndex] = helper;
-       }
+      int nextAdSlotIndex = (currentSlotGroup + i) * (_adFrequency + 1) - 1;
+
+      if (nextAdSlotIndex > 0 && !_adHelpers.containsKey(nextAdSlotIndex)) {
+        debugPrint('🚀 Preloading Reel Ad at index $nextAdSlotIndex');
+        final helper = ReelNativeAdHelper();
+        helper.loadAd(() {});
+        _adHelpers[nextAdSlotIndex] = helper;
+      }
     }
   }
 
   void _preloadVideos(int currentIndex) {
     if (_videoUrls.isEmpty) return;
-    
+
     // Preload next 3 videos
     for (int i = currentIndex + 1; i <= currentIndex + 3; i++) {
       final actualIndex = i % _videoUrls.length;
@@ -95,12 +97,12 @@ class _ReelsScreenState extends State<ReelsScreen> {
             ),
           );
         }
-        
+
         return PageView.builder(
           controller: _pageController,
           scrollDirection: Axis.vertical,
           // Use a very large number for infinite scroll effect
-          itemCount: 999999, 
+          itemCount: 999999,
           onPageChanged: (index) {
             setState(() {
               _currentPage = index;
@@ -113,18 +115,20 @@ class _ReelsScreenState extends State<ReelsScreen> {
             // Formula: every (freq + 1) items is an ad slot.
             // Example freq=2, slots = 2, 5, 8, 11...
             // If freq=2, we want: Reel(0), Reel(1), Ad(2), Reel(3), Reel(4), Ad(5)...
-            
-            final bool isAdSlot = index > 0 && (index + 1) % (_adFrequency + 1) == 0;
+
+            final bool isAdSlot =
+                index > 0 && (index + 1) % (_adFrequency + 1) == 0;
 
             if (isAdSlot && !RemoteConfigService.isReelAdsDisabled()) {
               if (!_adHelpers.containsKey(index)) {
-                _adHelpers[index] = ReelNativeAdHelper()..loadAd(() {
-                  if (mounted && _currentPage == index) setState(() {});
-                });
+                _adHelpers[index] = ReelNativeAdHelper()
+                  ..loadAd(() {
+                    if (mounted && _currentPage == index) setState(() {});
+                  });
               }
 
               final helper = _adHelpers[index]!;
-              
+
               // If ad failed, automatically skip to next reel (per requirement)
               if (helper.lastError != null) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -174,20 +178,27 @@ class ReelItem extends StatefulWidget {
   final String videoUrl;
   final VoidCallback? onMuteToggle;
   final bool isActive;
-  const ReelItem({super.key, required this.videoUrl, this.onMuteToggle, required this.isActive});
+  const ReelItem({
+    super.key,
+    required this.videoUrl,
+    this.onMuteToggle,
+    required this.isActive,
+  });
 
   @override
   State<ReelItem> createState() => _ReelItemState();
 }
 
-class _ReelItemState extends State<ReelItem> with SingleTickerProviderStateMixin {
+class _ReelItemState extends State<ReelItem>
+    with SingleTickerProviderStateMixin {
   VideoPlayerController? _controller;
   bool _isInitialized = false;
   bool _hasError = false;
   bool _isDownloading = false;
-  
+
   // For showing mute/unmute icon briefly
   bool _showMuteIndicator = false;
+  String _errorMsg = 'Failed to load video';
   late AnimationController _fadeController;
 
   @override
@@ -215,9 +226,11 @@ class _ReelItemState extends State<ReelItem> with SingleTickerProviderStateMixin
 
   Future<void> _initializeVideo() async {
     try {
-      final File file = await DefaultCacheManager().getSingleFile(widget.videoUrl);
+      final File file = await DefaultCacheManager().getSingleFile(
+        widget.videoUrl,
+      );
       _controller = VideoPlayerController.file(file);
-      
+
       await _controller!.initialize();
       if (mounted) {
         setState(() {
@@ -233,14 +246,21 @@ class _ReelItemState extends State<ReelItem> with SingleTickerProviderStateMixin
     } catch (e) {
       debugPrint('❌ Video Cache Error: $e');
       if (mounted) {
-        setState(() => _hasError = true);
+        bool isNetworkError = e is SocketException || e is HttpException ||
+            e.toString().contains('Connection failed');
+        setState(() {
+          _hasError = true;
+          _errorMsg = isNetworkError
+              ? 'No internet connection'
+              : 'Failed to load video';
+        });
       }
     }
   }
 
   void _toggleMute() {
     if (_controller == null || !_isInitialized) return;
-    
+
     setState(() {
       ReelsScreen.isGlobalMuted = !ReelsScreen.isGlobalMuted;
       _controller!.setVolume(ReelsScreen.isGlobalMuted ? 0 : 1);
@@ -263,22 +283,38 @@ class _ReelItemState extends State<ReelItem> with SingleTickerProviderStateMixin
 
   Future<void> _downloadVideo() async {
     if (_isDownloading) return;
-    
+
     setState(() => _isDownloading = true);
-    
+
     try {
-      // 1. Check for storage permission (gal handles this internally mostly, but we trigger the attempt)
-      final bool hasAccess = await Gal.hasAccess();
+      // 1. Check for storage permission
+      bool hasAccess = await Gal.hasAccess();
       if (!hasAccess) {
-        await Gal.requestAccess();
+        hasAccess = await Gal.requestAccess();
+      }
+
+      if (!hasAccess) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Storage permission denied. Please enable it in settings.',
+              ),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        return;
       }
 
       // 2. Get file from cache (it should already be there since video is playing)
-      final File file = await DefaultCacheManager().getSingleFile(widget.videoUrl);
-      
+      final File file = await DefaultCacheManager().getSingleFile(
+        widget.videoUrl,
+      );
+
       // 3. Save to gallery
       await Gal.putVideo(file.path);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -329,24 +365,30 @@ class _ReelItemState extends State<ReelItem> with SingleTickerProviderStateMixin
             ),
           )
         else if (_hasError)
-          const Center(
+          Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.error_outline, color: Colors.white, size: 40),
-                SizedBox(height: 8),
-                Text('Failed to load video', style: TextStyle(color: Colors.white)),
+                const Icon(Icons.error_outline, color: Colors.white, size: 40),
+                const SizedBox(height: 8),
+                Text(
+                  _errorMsg,
+                  style: const TextStyle(color: Colors.white),
+                ),
               ],
             ),
           )
         else
           const Center(child: CircularProgressIndicator(color: Colors.white)),
-        
+
         // Mute/Unmute Indicator Overlay
         if (_showMuteIndicator)
           Center(
             child: FadeTransition(
-              opacity: Tween<double>(begin: 1.0, end: 0.0).animate(_fadeController),
+              opacity: Tween<double>(
+                begin: 1.0,
+                end: 0.0,
+              ).animate(_fadeController),
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -354,7 +396,9 @@ class _ReelItemState extends State<ReelItem> with SingleTickerProviderStateMixin
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  ReelsScreen.isGlobalMuted ? Icons.volume_off : Icons.volume_up,
+                  ReelsScreen.isGlobalMuted
+                      ? Icons.volume_off
+                      : Icons.volume_up,
                   color: Colors.white,
                   size: 40,
                 ),
@@ -372,7 +416,11 @@ class _ReelItemState extends State<ReelItem> with SingleTickerProviderStateMixin
             children: [
               const Text(
                 '@archify_ai',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
               const SizedBox(height: 8),
               const Text(
@@ -384,7 +432,7 @@ class _ReelItemState extends State<ReelItem> with SingleTickerProviderStateMixin
             ],
           ),
         ),
-        
+
         // Right side buttons
         Positioned(
           bottom: 100,
@@ -394,14 +442,16 @@ class _ReelItemState extends State<ReelItem> with SingleTickerProviderStateMixin
             children: [
               // Mute/Unmute Action Button
               _buildActionButton(
-                ReelsScreen.isGlobalMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
+                ReelsScreen.isGlobalMuted
+                    ? Icons.volume_off_rounded
+                    : Icons.volume_up_rounded,
                 ReelsScreen.isGlobalMuted ? 'Muted' : 'Sound',
                 onTap: _toggleMute,
               ),
               const SizedBox(height: 20),
               // Download Action Button
               _buildActionButton(
-                Icons.file_download_outlined, 
+                Icons.file_download_outlined,
                 'Download',
                 onTap: _downloadVideo,
               ),
@@ -412,7 +462,12 @@ class _ReelItemState extends State<ReelItem> with SingleTickerProviderStateMixin
     );
   }
 
-  Widget _buildActionButton(IconData icon, String label, {VoidCallback? onTap, bool isLoading = false}) {
+  Widget _buildActionButton(
+    IconData icon,
+    String label, {
+    VoidCallback? onTap,
+    bool isLoading = false,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -423,16 +478,23 @@ class _ReelItemState extends State<ReelItem> with SingleTickerProviderStateMixin
               color: Colors.black.withOpacity(0.35),
               shape: BoxShape.circle,
             ),
-            child: isLoading 
-              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-              : Icon(icon, color: Colors.white, size: 24),
+            child: isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : Icon(icon, color: Colors.white, size: 24),
           ),
           const SizedBox(height: 6),
           Text(
-            label, 
+            label,
             style: const TextStyle(
-              color: Colors.white, 
-              fontSize: 12, 
+              color: Colors.white,
+              fontSize: 12,
               fontWeight: FontWeight.w600,
               shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
             ),
