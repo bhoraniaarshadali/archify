@@ -199,12 +199,17 @@ class RemoteConfigService {
   static String getNativeAdId() => _json()['nativeAd_id']?.toString() ?? '';
   static String getInterstitialAdId() => _json()['interstitialAd_id']?.toString() ?? '';
   static String getRewardedAdId() => _json()['rewardAd_id']?.toString() ?? '';
+  static String getCollapsiveBannerAdId() {
+    final topLevel = _remoteConfig.getString('collapsive_bannerAd_id');
+    if (topLevel.isNotEmpty) return topLevel;
+    return _json()['collapsive_bannerAd_id']?.toString() ?? '';
+  }
 
   // 📺 REEL ADS
   static String getNativeReelAdId() {
     final adId = _json()['nativeAd_reelAd_id']?.toString() ?? '';
     // Use test id if not defined, unless "11" (disabled)
-    if (adId.isEmpty) return "ca-app-pub-3940256099942544/2247696110";
+    if (adId.isEmpty) return "11";
     return adId;
   }
 
@@ -238,4 +243,4 @@ class RemoteConfigService {
 
   // 🪙 DAILY CREDIT
   static int getDailyCredit() => _json()['daily_credit'] ?? 0;
-}
+}

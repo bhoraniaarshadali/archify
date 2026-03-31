@@ -43,6 +43,7 @@ dependencies:
   get: ^4.7.3
   purchases_flutter: ^9.15.1
   webview_flutter: ^4.13.1
+  shimmer: ^3.0.0
 
 dev_dependencies:
   flutter_test:

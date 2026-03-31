@@ -124,6 +124,8 @@ import 'services/credit_controller.dart';
 import 'services/remote_config_controller.dart';
 import 'services/app_config.dart';
 
+final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -221,6 +223,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       builder: (context, child) {
         return GetMaterialApp(
           navigatorKey: AppNavigator.navigatorKey,
+          navigatorObservers: [routeObserver],
           title: 'Archify',
           debugShowCheckedModeBanner: false,
           themeMode: ThemeMode.light,

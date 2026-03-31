@@ -4,6 +4,12 @@ import '../../services/chat/chat_provider.dart';
 import 'assistants_screen.dart';
 import 'chat_screen.dart';
 import '../../navigation/app_navigator.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart' hide AppState;
+import 'package:shimmer/shimmer.dart';
+import '../../ads/remote_config_service.dart';
+import '../../ads/ad_manager.dart';
+import '../../ads/app_state.dart';
+import '../../main.dart'; // To access global routeObserver
 
 class ChatHistoryScreen extends StatefulWidget {
   const ChatHistoryScreen({super.key});
@@ -12,15 +18,59 @@ class ChatHistoryScreen extends StatefulWidget {
   State<ChatHistoryScreen> createState() => _ChatHistoryScreenState();
 }
 
-class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
+class _ChatHistoryScreenState extends State<ChatHistoryScreen> with RouteAware {
   final ChatProvider _chatProvider = ChatProvider();
   List<Map<String, dynamic>> _sessions = [];
   bool _isLoading = true;
+  
+  bool _showAd = false;
 
   @override
   void initState() {
     super.initState();
     _loadSessions();
+    _initBannerAd();
+  }
+
+  Future<void> _initBannerAd() async {
+    final adId = RemoteConfigService.getCollapsiveBannerAdId();
+
+    // Condition: Hide if premium OR no internet OR manually disabled OR if ID is "11"
+    if (!AppState.canLoadAds || adId == '11' || adId.isEmpty) {
+      setState(() {
+        _showAd = false;
+      });
+      return;
+    }
+
+    setState(() {
+      _showAd = true;
+    });
+
+    // Fresh load every time we enter the screen via initState
+    AdsManager.instance.refreshCollapsibleBannerAd();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (route is PageRoute) {
+      routeObserver.subscribe(this, route);
+    }
+  }
+
+  @override
+  void didPopNext() {
+    // When returning to this screen from another screen
+    debugPrint("🔄 Returning to ChatHistoryScreen: Refreshing ad...");
+    AdsManager.instance.refreshCollapsibleBannerAd();
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
   }
 
   Future<void> _loadSessions() async {
@@ -74,22 +124,57 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _sessions.isEmpty
-              ? _buildEmptyState()
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _sessions.length,
-                  itemBuilder: (context, index) {
-                    final session = _sessions[index];
-                    final assistantId = session['assistant_id'] as String;
-                    final lastMsg = session['content'] as String;
-                    final timestamp = DateTime.parse(session['timestamp'] as String);
-                    
-                    return _buildSessionTile(assistantId, lastMsg, timestamp);
-                  },
-                ),
+      body: Column(
+        children: [
+          Expanded(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _sessions.isEmpty
+                    ? _buildEmptyState()
+                    : ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: _sessions.length,
+                        itemBuilder: (context, index) {
+                          final session = _sessions[index];
+                          final assistantId = session['assistant_id'] as String;
+                          final lastMsg = session['content'] as String;
+                          final timestamp = DateTime.parse(session['timestamp'] as String);
+                          
+                          return _buildSessionTile(assistantId, lastMsg, timestamp);
+                        },
+                      ),
+          ),
+          if (_showAd)
+            ValueListenableBuilder<BannerAd?>(
+              valueListenable: AdsManager.instance.collapsibleBannerAd,
+              builder: (context, banner, _) {
+                final height = (banner != null) 
+                    ? banner.size.height.toDouble() 
+                    : 60.0;
+                
+                return SizedBox(
+                  height: height,
+                  width: double.infinity,
+                  child: banner != null 
+                      ? AdWidget(ad: banner) 
+                      : _buildAdShimmer(),
+                );
+              },
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAdShimmer() {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: Container(
+        height: 60, // Smashed up to 60 for safe adaptive height placeholder
+        width: double.infinity,
+        color: Colors.white,
+      ),
     );
   }
 

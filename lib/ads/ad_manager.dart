@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:google_mobile_ads/google_mobile_ads.dart' hide AppState;
+import 'package:get/get.dart';
 
 import 'app_state.dart';
 import 'nativeAds/native_ad_helper.dart';
@@ -14,6 +15,15 @@ class AdsManager {
   // ================= NATIVE ADS =================
   final NativeAdHelper nativeIntroAd = NativeAdHelper();
   bool initialized = false;
+
+  // ================= COLLAPSIBLE BANNER =================
+  BannerAd? _collapsibleBannerAd; // Internal reference
+  bool _collapsibleBannerLoading = false;
+  final ValueNotifier<BannerAd?> collapsibleBannerAd = ValueNotifier<BannerAd?>(null);
+  
+  // Backward compatibility getter for the notifier status
+  ValueNotifier<bool> get collapsibleBannerAdLoaded => _collapsibleBannerAdLoadedNotifier;
+  final ValueNotifier<bool> _collapsibleBannerAdLoadedNotifier = ValueNotifier<bool>(false);
 
   // ================= INTERSTITIAL ADS =================
   InterstitialAd? _interstitialAd;
@@ -153,6 +163,9 @@ class AdsManager {
       
       // 🔹 Preload Rewarded
       _loadRewardedAd();
+
+      // 🔹 Preload Collapsible Banner
+      _loadCollapsibleBannerAd();
     }
 
     initialized = true;
@@ -220,16 +233,84 @@ class AdsManager {
     _interstitialAd = null;
   }
 
+  // ================= COLLAPSIBLE BANNER LOAD =================
+
+  void _loadCollapsibleBannerAd() {
+    if (_collapsibleBannerLoading || _collapsibleBannerAd != null) return;
+    if (!AppState.canLoadAds) return;
+
+    final adId = RemoteConfigService.getCollapsiveBannerAdId();
+    if (adId.isEmpty || adId == '11') return;
+
+    _collapsibleBannerLoading = true;
+
+    // Use a safe width calculation
+    final int width = (Get.width > 0) ? Get.width.toInt() : 320;
+    
+    AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(width).then((size) {
+      final effectiveSize = size ?? AdSize.banner;
+
+      _collapsibleBannerAd = BannerAd(
+        adUnitId: adId,
+        size: effectiveSize,
+        request: const AdRequest(
+          extras: {'collapsible': 'bottom'},
+        ),
+        listener: BannerAdListener(
+          onAdLoaded: (ad) {
+            _collapsibleBannerLoading = false;
+            collapsibleBannerAd.value = ad as BannerAd;
+            _collapsibleBannerAdLoadedNotifier.value = true;
+            debugPrint("✅ Collapsible Banner Loaded (Size: $effectiveSize)");
+          },
+          onAdFailedToLoad: (ad, error) {
+            _collapsibleBannerLoading = false;
+            collapsibleBannerAd.value = null;
+            _collapsibleBannerAdLoadedNotifier.value = false;
+            ad.dispose();
+            _collapsibleBannerAd = null;
+            debugPrint("❌ Collapsible Banner failed: ${error.message}");
+          },
+        ),
+      )..load();
+    }).catchError((e) {
+      _collapsibleBannerLoading = false;
+      debugPrint("❌ Error calculating adaptive size: $e");
+    });
+  }
+
+  BannerAd? getCollapsibleBannerAd() {
+    if (_collapsibleBannerAd == null) {
+      _loadCollapsibleBannerAd();
+    }
+    return _collapsibleBannerAd;
+  }
+  
+  void refreshCollapsibleBannerAd() {
+    _collapsibleBannerAd?.dispose();
+    _collapsibleBannerAd = null;
+    _collapsibleBannerLoading = false;
+    collapsibleBannerAd.value = null;
+    _collapsibleBannerAdLoadedNotifier.value = false;
+    
+    _loadCollapsibleBannerAd();
+  }
+
   // ================= DISPOSE =================
 
   void dispose() {
     nativeIntroAd.dispose();
     _interstitialAd?.dispose();
     _rewardedAd?.dispose(); // Dispose Rewarded
+    _collapsibleBannerAd?.dispose();
     _interstitialAd = null;
     _rewardedAd = null;
+    _collapsibleBannerAd = null;
+    collapsibleBannerAd.value = null;
     _interstitialLoading = false;
     _rewardedAdLoading = false;
+    _collapsibleBannerLoading = false;
+    _collapsibleBannerAdLoadedNotifier.value = false;
     initialized = false;
   }
 }
