@@ -2,54 +2,67 @@ import 'package:flutter/material.dart';
 
 class CustomPressButton extends StatefulWidget {
   final Widget child;
-  final VoidCallback onTap;
-  final double scaleValue;
+  final VoidCallback? onTap;
+  final double borderRadius;
+
+  final Duration duration;
+  final double darkOpacity;
 
   const CustomPressButton({
     super.key,
     required this.child,
-    required this.onTap,
-    this.scaleValue = 0.95,
+    this.onTap,
+    this.borderRadius = 40,
+    this.duration = const Duration(milliseconds: 20),
+    this.darkOpacity = 0.35,
   });
 
   @override
   State<CustomPressButton> createState() => _CustomPressButtonState();
 }
 
-class _CustomPressButtonState extends State<CustomPressButton> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
+class _CustomPressButtonState extends State<CustomPressButton> {
+  bool _pressed = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 100),
-    );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: widget.scaleValue).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+  void _setPressed(bool v) {
+    if (!mounted) return;
+    if (_pressed != v) {
+      setState(() => _pressed = v);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final bool enabled = widget.onTap != null;
+
     return GestureDetector(
-      onTapDown: (_) => _controller.forward(),
-      onTapUp: (_) {
-        _controller.reverse();
-        widget.onTap();
-      },
-      onTapCancel: () => _controller.reverse(),
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: widget.child,
+      behavior: HitTestBehavior.translucent,
+      onTapDown: enabled ? (_) => _setPressed(true) : null,
+      onTapUp: enabled
+          ? (_) {
+              _setPressed(false);
+              widget.onTap?.call();
+            }
+          : null,
+      onTapCancel: enabled ? () => _setPressed(false) : null,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(widget.borderRadius),
+        child: Stack(
+          children: [
+            widget.child,
+
+            /// DARK OVERLAY
+            Positioned.fill(
+              child: IgnorePointer(
+                child: AnimatedOpacity(
+                  duration: widget.duration,
+                  opacity: enabled && _pressed ? widget.darkOpacity : 0,
+                  child: Container(color: Colors.black),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

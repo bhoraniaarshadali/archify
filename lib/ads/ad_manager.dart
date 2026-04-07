@@ -1,9 +1,8 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart' hide AppState;
 import 'package:get/get.dart';
 
-import 'app_state.dart';
 import 'nativeAds/native_ad_helper.dart';
 import 'remote_config_service.dart';
 
@@ -13,7 +12,9 @@ class AdsManager {
   static final AdsManager instance = AdsManager._();
 
   // ================= NATIVE ADS =================
-  final NativeAdHelper nativeIntroAd = NativeAdHelper();
+  final NativeAdHelper nativeIntroAd = NativeAdHelper(unitIdGetter: () => RemoteConfigService.getNativeAdId());
+  final NativeAdHelper nativeDashboardAd = NativeAdHelper(unitIdGetter: () => RemoteConfigService.getHomeNativeAdId());
+  final NativeAdHelper nativeAssistAd = NativeAdHelper(unitIdGetter: () => RemoteConfigService.getAssistNativeAdId());
   bool initialized = false;
 
   // ================= COLLAPSIBLE BANNER =================
@@ -34,18 +35,17 @@ class AdsManager {
   void _loadRewardedAd() {
     if (_rewardedAdLoading || _rewardedAd != null) return;
     
-    // Check if we can load ads
-    if (!AppState.canLoadAds) return;
-
+    // 💡 Always allow background loading, but use IDs from Remote Config
     final adId = RemoteConfigService.getRewardedAdId(); 
-    
-    // Using a safe string for now if remote config is empty, will use test id.
-    final String effectiveAdId = adId.isNotEmpty ? adId : "ca-app-pub-3940256099942544/5224354917"; // Android Test Rewarded ID
+    if (adId.isEmpty || adId == '11') {
+      debugPrint("📢 Rewarded Loading Skipped: ID is $adId");
+      return;
+    }
 
     _rewardedAdLoading = true;
 
     RewardedAd.load(
-      adUnitId: effectiveAdId, 
+      adUnitId: adId, 
       request: const AdRequest(),
       rewardedAdLoadCallback: RewardedAdLoadCallback(
         onAdLoaded: (ad) {
@@ -63,14 +63,21 @@ class AdsManager {
   }
 
   static Future<bool> showRewardedAd() async {
-    final Completer<bool> completer = Completer<bool>();
+    final adId = RemoteConfigService.getRewardedAdId();
     
+    // 🛡️ GATEKEEPER: Check if allowed to show
+    if (!RemoteConfigService.shouldShowAdsGlobally() || !RemoteConfigService.shouldShowAd(adId)) {
+      debugPrint("🚫 Rewarded Blocked by Remote Config (ID: $adId)");
+      return true; // Return success to allow app flow
+    }
+
     if (instance._rewardedAd == null) {
       instance._loadRewardedAd();
       debugPrint("⚠️ Rewarded Ad not ready");
-      return false;
+      return true; // Still allow flow
     }
 
+    final Completer<bool> completer = Completer<bool>();
     bool userEarnedReward = false;
 
     instance._rewardedAd!.fullScreenContentCallback = FullScreenContentCallback(
@@ -84,7 +91,7 @@ class AdsManager {
         ad.dispose();
         instance._rewardedAd = null;
         instance._loadRewardedAd();
-        if (!completer.isCompleted) completer.complete(false);
+        if (!completer.isCompleted) completer.complete(true); // Allow flow on failure
       },
     );
 
@@ -151,25 +158,77 @@ class AdsManager {
 
     await MobileAds.instance.initialize();
 
-    // SINGLE SOURCE OF TRUTH
-    if (AppState.canLoadAds) {
-      // 🔹 Native intro ad
-      nativeIntroAd.loadAd(() {
-        debugPrint("✅ Intro Native Ad Ready");
-      });
+    // 💡 ALWAYS trigger background preloading as requested.
+    // Display is controlled via gatekeepers in show/widget methods.
+    
+    // 🔹 Native intro ad
+    nativeIntroAd.loadAd(() {
+      debugPrint("✅ Intro Native Ad Ready");
+    });
 
-      // 🔹 Preload interstitial
-      _loadInterstitial();
-      
-      // 🔹 Preload Rewarded
-      _loadRewardedAd();
+    // 🔹 Native dashboard ad
+    nativeDashboardAd.loadAd(() {
+      debugPrint("✅ Dashboard Native Ad Ready");
+    });
 
-      // 🔹 Preload Collapsible Banner
-      _loadCollapsibleBannerAd();
-    }
+    // 🔹 Native assist ad
+    nativeAssistAd.loadAd(() {
+      debugPrint("✅ Assist Native Ad Ready");
+    });
+
+    // 🔹 Preload interstitial
+    _loadInterstitial();
+    
+    // 🔹 Preload Rewarded
+    _loadRewardedAd();
+
+    // 🔹 Preload Collapsible Banner
+    _loadCollapsibleBannerAd();
+
+    _startBackgroundKeepReadyTimer();
 
     initialized = true;
     debugPrint("🔥 AdsManager initialized");
+  }
+
+  /// 🛡️ Keep background ads ready at all times by checking state periodically
+  void _startBackgroundKeepReadyTimer() {
+    Timer.periodic(const Duration(seconds: 30), (_) {
+      // 🏘️ Home Dashboard Ad
+      if (!nativeDashboardAd.isAdLoaded && !nativeDashboardAd.isAdLoading) {
+        debugPrint("🔋 AdsManager: Background-refreshing Home Dashboard Ad...");
+        nativeDashboardAd.loadAd(null);
+      }
+
+      // 🤖 Assist Screen Ad
+      if (!nativeAssistAd.isAdLoaded && !nativeAssistAd.isAdLoading) {
+        debugPrint("🔋 AdsManager: Background-refreshing Assist Screen Ad...");
+        nativeAssistAd.loadAd(null);
+      }
+
+      // 🎥 Intro Native Ad
+      if (!nativeIntroAd.isAdLoaded && !nativeIntroAd.isAdLoading) {
+        nativeIntroAd.loadAd(null);
+      }
+    });
+  }
+
+  /// 🔄 Force refresh the dashboard ad to get a new impression
+  void refreshDashboardAd() {
+    debugPrint("🔄 AdsManager: Refreshing Dashboard Native Ad for new impression...");
+    nativeDashboardAd.clearAd(); // Safe reset without disposing helper
+    nativeDashboardAd.loadAd(() {
+      debugPrint("✅ Dashboard Native Ad REFRESHED");
+    });
+  }
+
+  /// 🔄 Force refresh the assist ad to get a new impression
+  void refreshAssistAd() {
+    debugPrint("🔄 AdsManager: Refreshing Assist Native Ad for new impression...");
+    nativeAssistAd.clearAd(); // Safe reset without disposing helper
+    nativeAssistAd.loadAd(() {
+      debugPrint("✅ Assist Native Ad REFRESHED");
+    });
   }
 
 
@@ -178,11 +237,11 @@ class AdsManager {
   void _loadInterstitial() {
     if (_interstitialLoading || _interstitialAd != null) return;
     
-    // Check if we can load ads
-    if (!AppState.canLoadAds) return;
-
     final adId = RemoteConfigService.getInterstitialAdId();
-    if (adId.isEmpty) return;
+    if (adId.isEmpty || adId == '11') {
+      debugPrint("📢 Interstitial Loading Skipped: ID is $adId");
+      return;
+    }
 
     _interstitialLoading = true;
 
@@ -209,6 +268,14 @@ class AdsManager {
   /// Call this ONLY after checking:
   /// AppState.shouldShowInterstitialOnNavigation()
   void showInterstitialIfAvailable() {
+    final adId = RemoteConfigService.getInterstitialAdId();
+    
+    // 🛡️ GATEKEEPER: Check if allowed to show
+    if (!RemoteConfigService.shouldShowAdsGlobally() || !RemoteConfigService.shouldShowAd(adId)) {
+      debugPrint("🚫 Interstitial Blocked by Remote Config");
+      return;
+    }
+
     if (_interstitialAd == null) {
       _loadInterstitial();
       return;
@@ -237,7 +304,6 @@ class AdsManager {
 
   void _loadCollapsibleBannerAd() {
     if (_collapsibleBannerLoading || _collapsibleBannerAd != null) return;
-    if (!AppState.canLoadAds) return;
 
     final adId = RemoteConfigService.getCollapsiveBannerAdId();
     if (adId.isEmpty || adId == '11') return;
@@ -300,6 +366,7 @@ class AdsManager {
 
   void dispose() {
     nativeIntroAd.dispose();
+    nativeDashboardAd.dispose();
     _interstitialAd?.dispose();
     _rewardedAd?.dispose(); // Dispose Rewarded
     _collapsibleBannerAd?.dispose();

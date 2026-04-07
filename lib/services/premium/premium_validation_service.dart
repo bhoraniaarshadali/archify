@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../ads/app_state.dart';
 import '../daily_credit_manager.dart';
-import '../../screens/premium/premium_module_screen.dart';
+import '../../screens/premium/pro_screen.dart';
 
 class PremiumValidationService {
   /// Check if user can proceed with generation.
-  /// If not, route to the appropriate tab in PremiumModuleScreen.
+  /// If not, route to the appropriate tab in ProScreen.
   static Future<bool> canGenerateImage(BuildContext context) async {
     final int currentCredits = DailyCreditManager.getRemainingCredit();
     
@@ -33,7 +33,7 @@ class PremiumValidationService {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => PremiumModuleScreen(initialTabIndex: tabIndex),
+        builder: (context) => ProScreen(from: "validation", initialTabIndex: tabIndex),
       ),
     );
   }

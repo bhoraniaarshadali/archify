@@ -4,6 +4,9 @@ import '../../navigation/app_navigator.dart';
 import '../../widgets/daily_credit_badge.dart';
 import 'chat_screen.dart';
 import 'history_screen.dart';
+import '../../ads/ad_manager.dart';
+import '../../ads/remote_config_service.dart';
+import '../../ads/nativeAds/native_ad_widget.dart';
 
 class Assistant {
   final String name;
@@ -93,6 +96,19 @@ class AssistantsScreen extends StatefulWidget {
 
 class _AssistantsScreenState extends State<AssistantsScreen> {
   final TextEditingController _questionController = TextEditingController();
+
+  // 🔑 GlobalKey solves "AdWidget is already in the Widget tree" permanently
+  final GlobalKey _adKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    // 🛡️ Always ensure ad is loading/loaded in background
+    final helper = AdsManager.instance.nativeAssistAd;
+    if (!helper.isAdLoaded && !helper.isAdLoading) {
+      helper.loadAd(null);
+    }
+  }
 
   @override
   void dispose() {
@@ -190,6 +206,36 @@ class _AssistantsScreenState extends State<AssistantsScreen> {
                 return _buildAssistantCard(AssistantsScreen.assistants[index + 1]);
               },
             ),
+
+            const SizedBox(height: 16),
+
+            // 🛡️ NATIVE AD GATEKEEPER: Assist Screen Placement
+            Builder(
+              builder: (context) {
+                final adId = RemoteConfigService.getAssistNativeAdId();
+                if (RemoteConfigService.shouldShowAdsGlobally() && RemoteConfigService.shouldShowAd(adId)) {
+                  final adHelper = AdsManager.instance.nativeAssistAd;
+                  return ListenableBuilder(
+                    listenable: adHelper,
+                    builder: (context, _) {
+                      // 🪙 Strategy: Show ad if loaded, keep it visible for this visit
+                      if (adHelper.isAdLoaded && adHelper.nativeAd != null) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          child: NativeAdWidget(
+                            key: _adKey,
+                            nativeAd: adHelper.nativeAd!,
+                          ),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+
             const SizedBox(height: 120), // Bottom nav space
           ],
         ),

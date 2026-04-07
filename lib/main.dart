@@ -117,7 +117,6 @@ import 'navigation/app_navigator.dart';
 import 'firebase_options.dart';
 import 'services/helper/background_generation_manager.dart';
 import 'services/helper/background_task_service.dart';
-import 'services/premium/billing_service.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'services/credit_controller.dart';
@@ -217,7 +216,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
-      designSize: const Size(375, 812), // Standard design size
+      designSize: const Size(1242, 2688), // Standard design size
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {

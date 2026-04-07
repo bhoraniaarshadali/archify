@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:gal/gal.dart';
+import '../home/home_screen.dart';
 import '../../services/remote_config_controller.dart';
 import '../../ads/remote_config_service.dart';
 import '../../ads/nativeAds/reel_native_ad_helper.dart';
@@ -86,7 +87,13 @@ class _ReelsScreenState extends State<ReelsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        Get.offAll(() => const HomeScreen());
+      },
+      child: Scaffold(
       backgroundColor: Colors.black,
       body: Obx(() {
         if (_videoUrls.isEmpty) {
@@ -116,10 +123,11 @@ class _ReelsScreenState extends State<ReelsScreen> {
             // Example freq=2, slots = 2, 5, 8, 11...
             // If freq=2, we want: Reel(0), Reel(1), Ad(2), Reel(3), Reel(4), Ad(5)...
 
+            final bool isAdsDisabled = RemoteConfigService.isReelAdsDisabled();
             final bool isAdSlot =
-                index > 0 && (index + 1) % (_adFrequency + 1) == 0;
+                !isAdsDisabled && index > 0 && (index + 1) % (_adFrequency + 1) == 0;
 
-            if (isAdSlot && !RemoteConfigService.isReelAdsDisabled()) {
+            if (isAdSlot) {
               if (!_adHelpers.containsKey(index)) {
                 _adHelpers[index] = ReelNativeAdHelper()
                   ..loadAd(() {
@@ -147,7 +155,7 @@ class _ReelsScreenState extends State<ReelsScreen> {
 
             // Calculate actual video index
             // Subtract number of ad slots before this index
-            final int adSlotsBefore = (index + 1) ~/ (_adFrequency + 1);
+            final int adSlotsBefore = isAdsDisabled ? 0 : (index + 1) ~/ (_adFrequency + 1);
             final int actualIndex = (index - adSlotsBefore) % _videoUrls.length;
 
             return ReelItem(
@@ -161,6 +169,7 @@ class _ReelsScreenState extends State<ReelsScreen> {
           },
         );
       }),
+    ),
     );
   }
 

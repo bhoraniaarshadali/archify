@@ -28,6 +28,7 @@ class _MyCreationsScreenState extends State<MyCreationsScreen> {
     '3D Model',
     'Text-to-Image',
     'Floor Plan',
+    'Custom',
     // 'Remove Object',
     // 'Replace Object',
   ];
@@ -82,6 +83,7 @@ class _MyCreationsScreenState extends State<MyCreationsScreen> {
       '3D Model': 'model3D',
       'Text-to-Image': 'textToImage',
       'Floor Plan': 'floorPlan',
+      'Custom': 'custom',
       // 'Remove Object': 'removeObject',
       // 'Replace Object': 'replaceObject',
     };
@@ -429,6 +431,8 @@ class _MyCreationsScreenState extends State<MyCreationsScreen> {
         return 'REMOVAL';
       case CreationCategory.replaceObject:
         return 'REPLACE';
+      case CreationCategory.custom:
+        return 'CUSTOM';
       default:
         return category.name.toUpperCase();
     }

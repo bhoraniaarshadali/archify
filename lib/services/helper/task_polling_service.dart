@@ -177,47 +177,8 @@ class TaskPollingService {
     }
   }
 
-  /// Query Video task status and result
-  static Future<Map<String, dynamic>?> queryVideoTask(String requestId, FeatureType feature) async {
-    try {
-      final apiFreeKey = RemoteConfigService.getApiFreeKey(feature);
-      final statusResp = await http.get(
-        Uri.parse('$_apiFreeBaseUrl/video/$requestId/status'),
-        headers: {'Authorization': 'Bearer $apiFreeKey'},
-      );
-
-      if (statusResp.statusCode == 200) {
-        final statusData = json.decode(statusResp.body);
-        if (statusData['code'] == 200) {
-          final status = statusData['resp_data']?['status'];
-          
-          if (status == 'success') {
-            final resultResp = await http.get(
-              Uri.parse('$_apiFreeBaseUrl/video/$requestId/result'),
-              headers: {'Authorization': 'Bearer $apiFreeKey'},
-            );
-            
-            if (resultResp.statusCode == 200) {
-              final resultData = json.decode(resultResp.body);
-              if (resultData['code'] == 200) {
-                final videoList = resultData['resp_data']?['video_list'] as List?;
-                return {
-                  'status': 'success',
-                  'url': (videoList != null && videoList.isNotEmpty) ? videoList[0] : null,
-                };
-              }
-            }
-          } else {
-            return {
-              'status': status,
-            };
-          }
-        }
-      }
-      return null;
-    } catch (e) {
-      debugPrint('❌ Error querying video task: $e');
-      return null;
-    }
+  /// Query Video task status and result (using KieAI)
+  static Future<Map<String, dynamic>?> queryVideoTask(String taskId, FeatureType feature) async {
+    return await queryKieTask(taskId, feature);
   }
 }

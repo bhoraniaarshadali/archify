@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../ads/app_state.dart';
 import '../../services/helper/settings_service.dart';
-import '../premium/premium_module_screen.dart';
+import '../premium/pro_screen.dart';
 import '../../navigation/app_navigator.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -93,7 +93,7 @@ class SettingsScreen extends StatelessWidget {
                   ),
                   if (!AppState.isPremiumUser)
                     ElevatedButton(
-                      onPressed: () => AppNavigator.push(context, const PremiumModuleScreen()),
+                      onPressed: () => AppNavigator.push(context, const ProScreen(from: "settings")),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF6366F1),
                         foregroundColor: Colors.white,

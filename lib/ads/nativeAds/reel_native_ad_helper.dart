@@ -12,21 +12,14 @@ class ReelNativeAdHelper extends ChangeNotifier {
   void loadAd(VoidCallback? onLoaded) {
     if (isAdLoaded || nativeAd != null || isAdLoading) return;
 
-    if (RemoteConfigService.isReelAdsDisabled()) {
-      debugPrint('⚠️ ReelNativeAdHelper: Reel Ads are disabled remotely.');
-      return;
-    }
-
     final unitId = RemoteConfigService.getNativeReelAdId();
-    if (unitId.isEmpty) {
-      debugPrint('⚠️ ReelNativeAdHelper: Ad Unit ID is empty.');
-      return;
+    if (unitId.isEmpty || unitId == "11") {
+      debugPrint('📢 ReelNativeAdHelper: Loading skipped (ID disabled or empty)');
+      return; 
     }
+    // 🛡️ Always preload background assets for valid IDs.
+    // Display is controlled via gatekeepers in UI/widgets.
 
-    if (!AppState.canLoadAds) {
-      debugPrint('⚠️ ReelNativeAdHelper: canLoadAds is false.');
-      return;
-    }
 
     isAdLoading = true;
     AppState.adLoadAttempted = true;

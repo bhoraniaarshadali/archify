@@ -23,6 +23,7 @@ enum CreationCategory {
   replaceObject, 
   floorPlan,
   styleTransfer,
+  custom,
 }
 
 extension CreationCategoryX on CreationCategory {
@@ -37,6 +38,7 @@ extension CreationCategoryX on CreationCategory {
       case CreationCategory.replaceObject: return FeatureType.objectReplace;
       case CreationCategory.floorPlan: return FeatureType.floorPlan;
       case CreationCategory.styleTransfer: return FeatureType.styleTransfer;
+      case CreationCategory.custom: return FeatureType.videoGeneration;
     }
   }
 }

@@ -8,11 +8,12 @@ import 'ai_tools_dashboard.dart';
 import '../../widgets/daily_credit_badge.dart';
 
 import '../assistants/assistants_screen.dart';
-import '../premium/premium_module_screen.dart';
+import '../premium/pro_screen.dart';
 import '../settings/settings_screen.dart';
 import '../../navigation/app_navigator.dart';
 import '../../ads/app_state.dart';
 import '../../ads/remote_config_service.dart';
+import '../../ads/ad_manager.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -23,7 +24,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   int _selectedIndex = 0;
   late AnimationController _bottomNavAnim;
 
@@ -47,10 +48,27 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       duration: const Duration(milliseconds: 600),
     );
     _bottomNavAnim.forward();
+    
+    // 👁️ Observe app lifecycle for background/foreground refreshes
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      if (_selectedIndex == 0) {
+        debugPrint("📱 App Resumed on Home: Refreshing Dashboard Ad...");
+        AdsManager.instance.refreshDashboardAd();
+      } else if (_selectedIndex == 1) {
+        debugPrint("📱 App Resumed on Assistants: Refreshing Assist Ad...");
+        AdsManager.instance.refreshAssistAd();
+      }
+    }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _bottomNavAnim.dispose();
     super.dispose();
   }
@@ -136,6 +154,14 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     return Expanded(
       child: GestureDetector(
         onTap: () {
+          // 🪙 Revenue Optimization: Refresh ads for the tab being LEAVED
+          // This prepares a fresh ad in the background for the NEXT visit.
+          if (_selectedIndex == 0) {
+            AdsManager.instance.refreshDashboardAd();
+          } else if (_selectedIndex == 1) {
+            AdsManager.instance.refreshAssistAd();
+          }
+
           setState(() => _selectedIndex = index);
         },
         behavior: HitTestBehavior.opaque,
@@ -220,7 +246,7 @@ class _HomeWrapper extends StatelessWidget {
             builder: (context, _) {
               if (AppState.isPremiumUser) return const SizedBox.shrink();
               return GestureDetector(
-                onTap: () => AppNavigator.push(context, const PremiumModuleScreen()),
+                onTap: () => AppNavigator.push(context, const ProScreen(from: "home")),
                 child: Container(
                   margin: const EdgeInsets.symmetric(vertical: 12),
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),

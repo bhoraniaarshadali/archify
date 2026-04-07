@@ -11,9 +11,29 @@ import '../floor_plan/floor_plan_upload_screen.dart';
 import '../edit_item/item_edit_upload_screen.dart';
 import '../style_transfer/style_transfer_upload_screen.dart';
 import '../text_to_image/text_to_image_screen.dart';
+import '../../ads/ad_manager.dart';
+import '../../ads/nativeAds/native_ad_widget.dart';
 
-class AiToolsDashboard extends StatelessWidget {
+class AiToolsDashboard extends StatefulWidget {
   const AiToolsDashboard({super.key});
+
+  @override
+  State<AiToolsDashboard> createState() => _AiToolsDashboardState();
+}
+
+class _AiToolsDashboardState extends State<AiToolsDashboard> {
+  // 🔑 GlobalKey solves "AdWidget is already in the Widget tree" permanently
+  final GlobalKey _adKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    // 🛡️ Always ensure ad is loading/loaded in background
+    final helper = AdsManager.instance.nativeDashboardAd;
+    if (!helper.isAdLoaded && !helper.isAdLoading) {
+      helper.loadAd(null);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -149,6 +169,30 @@ class AiToolsDashboard extends StatelessWidget {
           right: const SizedBox.shrink(),
         ));
       }
+    }
+
+    // 🛡️ NATIVE AD GATEKEEPER: Bottom Placement (Last item)
+    final adId = RemoteConfigService.getHomeNativeAdId();
+    if (RemoteConfigService.shouldShowAdsGlobally() && RemoteConfigService.shouldShowAd(adId)) {
+      final adHelper = AdsManager.instance.nativeDashboardAd;
+      content.add(
+        ListenableBuilder(
+          listenable: adHelper,
+          builder: (context, _) {
+            // 🪙 Strategy: Show ad if loaded, keep it visible for this visit
+            if (adHelper.isAdLoaded && adHelper.nativeAd != null) {
+              return Padding(
+                padding: const EdgeInsets.only(top: 16, bottom: 20),
+                child: NativeAdWidget(
+                  key: _adKey,
+                  nativeAd: adHelper.nativeAd!,
+                ),
+              );
+            }
+            return const SizedBox.shrink();
+          },
+        ),
+      );
     }
 
     return content;

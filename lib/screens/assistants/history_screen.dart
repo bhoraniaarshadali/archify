@@ -8,7 +8,6 @@ import 'package:google_mobile_ads/google_mobile_ads.dart' hide AppState;
 import 'package:shimmer/shimmer.dart';
 import '../../ads/remote_config_service.dart';
 import '../../ads/ad_manager.dart';
-import '../../ads/app_state.dart';
 import '../../main.dart'; // To access global routeObserver
 
 class ChatHistoryScreen extends StatefulWidget {
@@ -35,8 +34,8 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> with RouteAware {
   Future<void> _initBannerAd() async {
     final adId = RemoteConfigService.getCollapsiveBannerAdId();
 
-    // Condition: Hide if premium OR no internet OR manually disabled OR if ID is "11"
-    if (!AppState.canLoadAds || adId == '11' || adId.isEmpty) {
+    // 🛡️ GATEKEEPER: Centralized control
+    if (!RemoteConfigService.shouldShowAdsGlobally() || !RemoteConfigService.shouldShowAd(adId)) {
       setState(() {
         _showAd = false;
       });

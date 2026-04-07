@@ -12,7 +12,7 @@ import '../home/home_screen.dart';
 import '../edit_item/item_replace_screen.dart';
 import 'loading_screen.dart';
 import '../../core/app_status.dart';
-import '../premium/premium_module_screen.dart';
+import '../premium/pro_screen.dart';
 
 import '../../navigation/app_navigator.dart';
 import '../../ads/ad_manager.dart';
@@ -434,7 +434,7 @@ class _ResultScreenState extends State<ResultScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const PremiumModuleScreen(initialTabIndex: 0),
+                    builder: (context) => const ProScreen(from: "exterior", initialTabIndex: 0),
                   ),
                 );
               },

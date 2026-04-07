@@ -70,12 +70,27 @@ class _SplashScreenState extends State<SplashScreen>
     final prefs = await SharedPreferences.getInstance();
     final introSeen = prefs.getBool('intro_seen') ?? false;
 
-    // 📢 PRELOAD: Trigger Intro Native Ad as early as possible on Splash
+    // 📢 PRELOAD: Trigger Intro Native Ad strictly on Splash
     if (!introSeen && !AppState.isPremiumUser) {
+      final adHelper = AdsManager.instance.nativeIntroAd;
       if (!AdsManager.instance.initialized) {
-        AdsManager.instance.init();
+        await AdsManager.instance.init();
       } else {
-        AdsManager.instance.nativeIntroAd.loadAd(null);
+        adHelper.loadAd(null);
+      }
+      
+      // Strictly polling — wait up to 3 seconds for the ad to load fully on Splash
+      // BUT if it fails, we move on and let it load in background
+      int extraWait = 0;
+      while (!adHelper.isAdLoaded && extraWait < 15) {
+        // If it failed once, trigger immediate retry in background and stop blocking Splash
+        if (adHelper.lastError != null) {
+          debugPrint('⚠️ Ad failed on Splash, retrying in background...');
+          adHelper.loadAd(null); // Background retry
+          break; // Don't block screen flow on failure!
+        }
+        await Future.delayed(const Duration(milliseconds: 200));
+        extraWait++;
       }
     }
 

@@ -6,7 +6,7 @@ import '../../services/helper/my_creations_service.dart';
 import '../../widgets/premium_before_after_slider.dart'; // Using the premium slider if available, else basic
 import '../home/home_screen.dart';
 import 'item_processing_screen.dart';
-import '../premium/premium_module_screen.dart';
+import '../premium/pro_screen.dart';
 import '../../ads/ad_manager.dart';
 import '../../ads/app_state.dart';
 
@@ -221,7 +221,7 @@ class _ObjectRemovalResultScreenState extends State<ObjectRemovalResultScreen> {
       // Free user -> Go to Premium Screen
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const PremiumModuleScreen()),
+        MaterialPageRoute(builder: (context) => const ProScreen(from: "object_removal")),
       ).then((_) {
         // After returning from Premium Screen
         if (AppState.isPremiumUser) {
@@ -289,7 +289,7 @@ class _ObjectRemovalResultScreenState extends State<ObjectRemovalResultScreen> {
                 Navigator.pop(context); // Close sheet
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const PremiumModuleScreen()),
+                  MaterialPageRoute(builder: (context) => const ProScreen(from: "object_removal")),
                 ).then((_) {
                   // Check if they bought it
                   if (AppState.isPremiumUser) {

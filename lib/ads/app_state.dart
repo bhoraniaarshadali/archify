@@ -100,13 +100,22 @@ class AppState extends ChangeNotifier {
   /// Internal logic for checking if ads can be loaded
   bool get _canLoadAdsLogic {
     // Premium users never see ads
-    if (isPremiumActive) return false;
+    if (isPremiumActive) {
+      debugPrint('🚫 Ads Blocked: User is Premium (Tier: $_planTier)');
+      return false;
+    }
 
     // Manually disabled
-    if (!_adsAllowedManually) return false;
+    if (!_adsAllowedManually) {
+      debugPrint('🚫 Ads Blocked: Manually disabled by code');
+      return false;
+    }
 
     // No internet
-    if (!ConnectivityService.instance.currentStatus) return false;
+    if (!ConnectivityService.instance.currentStatus) {
+      debugPrint('🚫 Ads Blocked: No Internet connection');
+      return false;
+    }
 
     return true;
   }

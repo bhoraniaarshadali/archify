@@ -89,28 +89,7 @@ class _IntroScreenState extends State<IntroScreen> {
             },
           ),
           
-          // Global Skip Button
-          if (!((showAds && currentIndex == 3) || (!showAds && currentIndex == 2)))
-            Positioned(
-              top: MediaQuery.of(context).padding.top + 10,
-              right: 20,
-              child: TextButton(
-                onPressed: _completeIntro,
-                style: TextButton.styleFrom(
-                  backgroundColor: Colors.black.withOpacity(0.05),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-                child: const Text(
-                  "Skip",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
+
         ],
       ),
     );
@@ -254,12 +233,33 @@ class IntroAdPage extends StatelessWidget {
                       ),
                     );
                   } else {
-                    adHelper.loadAd(null);
                     return const Center(
                       child: CircularProgressIndicator(strokeWidth: 2),
                     );
                   }
                 },
+              ),
+            ),
+            
+            // Skip Button (Only for Ads)
+            Positioned(
+              top: 10,
+              right: 20,
+              child: TextButton(
+                onPressed: onNext,
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.black.withOpacity(0.05),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                child: const Text(
+                  "Skip",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
           ],

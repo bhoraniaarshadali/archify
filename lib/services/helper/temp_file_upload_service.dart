@@ -114,6 +114,7 @@ class TempFileUploadService {
     return await _uploadToTmpFiles(imageFile);
   }
 
+
   /// Internal fallback method for uploading to tmpfiles.org
   static Future<String?> _uploadToTmpFiles(File imageFile) async {
     const String uploadUrl = 'https://tmpfiles.org/api/v1/upload';

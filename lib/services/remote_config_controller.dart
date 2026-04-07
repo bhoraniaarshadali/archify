@@ -1,54 +1,105 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:flutter/foundation.dart'; // Added for debugPrint
+import 'package:flutter/foundation.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'dart:convert';
 import 'dart:async';
+import '../utils/app_constant.dart';
+import '../ads/remote_config_service.dart';
 
 class AdsVariable {
   static bool isConfigured = false;
-  bool isSendAppInMaintenance = false;
-  bool isShowIAmTester = false;
-  static bool isPurchase = false; // Add static isPurchase for global access
-  String selectedCreditPlan = "coins_plan_1";
-  String selectedPremiumPlan = "weekly_premium";
-  String testEmail = "test@example.com";
-  String testPassword = "password123";
-  
-  String firstCoinPlan = "coins_plan_1";
-  String secondCoinPlan = "coins_plan_2";
-  String thirdCoinPlan = "coins_plan_3";
-  String fourthCoinPlan = "coins_plan_4";
-  String fifthCoinPlan = "coins_plan_5";
-  String sixthCoinPlan = "coins_plan_6";
-  
-  String weeklyBonusCredit = "50";
-  String yearlyBonusCredit = "500";
-  List<String> reelsUrls = [];
-  List<dynamic> interiorStyles = [];
-
-  static void resetAdIds() {
-    // Implement reset logic here if needed, for now it's a placeholder as requested
-    debugPrint("AdsVariable: resetAdIds called");
-  }
 
   static Future<bool> isInternetConnected() async {
     final List<ConnectivityResult> connectivityResult = await (Connectivity().checkConnectivity());
     return !connectivityResult.contains(ConnectivityResult.none);
   }
+
+  static String get selectedCreditPlan {
+    final fromConfig = RemoteConfigController.to.selectedCreditPlanId.value;
+    return fromConfig.isNotEmpty ? fromConfig : AppConstant.firstCoinIdentifier;
+  }
+
+  static String get selectedPremiumPlan {
+    final fromConfig = RemoteConfigController.to.selectedPremiumPlanId.value;
+    return fromConfig.isNotEmpty ? fromConfig : AppConstant.yearlyIdentifier;
+  }
+
+  static bool get isShowIAmTester => RemoteConfigController.to.isShowIAmTester.value;
+
+  static bool _manualPurchaseStatus = false;
+
+  static bool get isPurchase {
+    // If manual purchase status is true (e.g. from successful login or real purchase)
+    return _manualPurchaseStatus;
+  }
+
+  static set isPurchase(bool value) {
+    _manualPurchaseStatus = value;
+  }
+
+  static void resetAdIds() {
+    // Placeholder for resetting ad IDs if needed
+  }
+
+  static String? get testEmail {
+    final email = RemoteConfigController.to.testEmail.value;
+    return email != "1" && email.isNotEmpty ? email : null;
+  }
+
+  static String? get testPassword {
+    final pass = RemoteConfigController.to.testPassword.value;
+    return pass != "1" && pass.isNotEmpty ? pass : null;
+  }
+
+  static String get weeklyBonusCredit =>
+      RemoteConfigService.getPlanCredits('weekly_plan', 199).toString();
+
+  static String get yearlyBonusCredit =>
+      RemoteConfigService.getPlanCredits('yearly_plan', 799).toString();
+
+  static String get firstCoinPlan =>
+      RemoteConfigService.getPlanCredits('credit_1_plan', 11).toString();
+
+  static String get secondCoinPlan =>
+      RemoteConfigService.getPlanCredits('credit_2_plan', 31).toString();
+
+  static String get thirdCoinPlan =>
+      RemoteConfigService.getPlanCredits('credit_3_plan', 71).toString();
+
+  static String get fourthCoinPlan =>
+      RemoteConfigService.getPlanCredits('credit_4_plan', 166).toString();
+
+  static String get fifthCoinPlan =>
+      RemoteConfigService.getPlanCredits('credit_5_plan', 401).toString();
+
+  static String get sixthCoinPlan =>
+      RemoteConfigService.getPlanCredits('credit_6_plan', 861).toString();
 }
 
 class RemoteConfigController extends GetxController {
-  final adsVariable = AdsVariable().obs;
+  static RemoteConfigController get to => Get.find<RemoteConfigController>();
+
   final isInitialized = false.obs;
   final FirebaseRemoteConfig _remoteConfig = FirebaseRemoteConfig.instance;
   StreamSubscription? _updateSubscription;
 
+  // Reactive Variables
+  var isShowIAmTester = false.obs;
+  var selectedCreditPlanId = "".obs;
+  var selectedPremiumPlanId = "".obs;
+  var testEmail = "".obs;
+  var testPassword = "".obs;
+  var premium = <String, dynamic>{}.obs;
+  var reelsUrls = <String>[].obs;
+  var interiorStyles = [].obs;
+
   @override
   void onInit() {
     super.onInit();
-    setupRemoteConfig();
+    // 💡 No setupRemoteConfig needed here anymore, as main.dart already calls RemoteConfigService.init()
+    _updateDataFromConfig();
     _listenToUpdates();
   }
 
@@ -58,88 +109,96 @@ class RemoteConfigController extends GetxController {
     super.onClose();
   }
 
-  Future<void> setupRemoteConfig() async {
-    try {
-      await _remoteConfig.setConfigSettings(RemoteConfigSettings(
-        fetchTimeout: const Duration(minutes: 1),
-        minimumFetchInterval: const Duration(hours: 1),
-      ));
-
-      await _remoteConfig.setDefaults({
-        "isSendAppInMaintenance": false,
-        "isShowIAmTester": false,
-        "selectedCreditPlan": "coins_plan_1",
-        "selectedPremiumPlan": "weekly_premium",
-        "testEmail": "test@example.com",
-        "testPassword": "password123",
-        "firstCoinPlan": "coins_plan_1",
-        "secondCoinPlan": "coins_plan_2",
-        "thirdCoinPlan": "coins_plan_3",
-        "fourthCoinPlan": "coins_plan_4",
-        "fifthCoinPlan": "coins_plan_5",
-        "sixthCoinPlan": "coins_plan_6",
-        "weeklyBonusCredit": "50",
-        "yearlyBonusCredit": "500",
-        "v1_home_decor_reels": "[]",
-        "v1_home_decor_interior_json": "[]",
-      });
-
-      await _remoteConfig.fetchAndActivate();
-      updateAdsVariable();
-      isInitialized.value = true;
-    } catch (e) {
-      print("Remote Config error: $e");
-      isInitialized.value = true; // Still set to true so splash doesn't hang
-    }
-  }
-
   void _listenToUpdates() {
     _updateSubscription = _remoteConfig.onConfigUpdated.listen((event) async {
       await _remoteConfig.activate();
-      updateAdsVariable();
-      print("Remote Config updated in real-time");
+      debugPrint('🔥 RemoteConfigController: Received real-time update');
+      _updateDataFromConfig();
     });
   }
 
-  void updateAdsVariable() {
-    adsVariable.update((val) {
-      if (val != null) {
-        AdsVariable.isConfigured = true;
-        val.isSendAppInMaintenance = _remoteConfig.getBool("isSendAppInMaintenance");
-        val.isShowIAmTester = _remoteConfig.getBool("isShowIAmTester");
-        val.selectedCreditPlan = _remoteConfig.getString("selectedCreditPlan");
-        val.selectedPremiumPlan = _remoteConfig.getString("selectedPremiumPlan");
-        val.testEmail = _remoteConfig.getString("testEmail");
-        val.testPassword = _remoteConfig.getString("testPassword");
-        val.firstCoinPlan = _remoteConfig.getString("firstCoinPlan");
-        val.secondCoinPlan = _remoteConfig.getString("secondCoinPlan");
-        val.thirdCoinPlan = _remoteConfig.getString("thirdCoinPlan");
-        val.fourthCoinPlan = _remoteConfig.getString("fourthCoinPlan");
-        val.fifthCoinPlan = _remoteConfig.getString("fifthCoinPlan");
-        val.sixthCoinPlan = _remoteConfig.getString("sixthCoinPlan");
-        val.weeklyBonusCredit = _remoteConfig.getString("weeklyBonusCredit");
-        val.yearlyBonusCredit = _remoteConfig.getString("yearlyBonusCredit");
-        
-        String reelsJson = _remoteConfig.getString("v1_home_decor_reels");
-        try {
-          var decoded = jsonDecode(reelsJson);
-          if (decoded is List) {
-            val.reelsUrls = List<String>.from(decoded);
-          }
-        } catch (e) {
-          print("Error parsing v1_home_decor_reels: $e");
-        }
+  void _updateDataFromConfig() {
+    try {
+      AdsVariable.isConfigured = true;
+      
+      // Use RemoteConfigService getters for unified JSON parsing
+      isShowIAmTester.value = RemoteConfigService.getString("isShowIAmTester") == "true" || _remoteConfig.getBool("isShowIAmTester");
+      selectedCreditPlanId.value = RemoteConfigService.getString("selectedCreditPlan");
+      selectedPremiumPlanId.value = RemoteConfigService.getString("selectedPremiumPlan");
+      testEmail.value = RemoteConfigService.getString("testEmail");
+      testPassword.value = RemoteConfigService.getString("testPassword");
 
-        String interiorJson = _remoteConfig.getString("v1_home_decor_interior_json");
-        try {
-          var decoded = jsonDecode(interiorJson);
-          if (decoded is List) {
-            val.interiorStyles = decoded;
-          }
-        } catch (e) {
-          print("Error parsing v1_home_decor_interior_json: $e");
-        }
+      // 🔍 Debug log for the source of the main blob
+      final blobVal = _remoteConfig.getValue('v1_home_decor');
+      debugPrint('🔥 RemoteConfig [v1_home_decor] Source: ${blobVal.source}');
+
+      // Populate premium map from service logic
+      // No need to manually parse here as getPlanCredits handles it, 
+      // but if other code uses 'controller.premium', we update it:
+      final premiumMap = RemoteConfigService.getPlanCredits('credit_1_plan', -1);
+      if (premiumMap != -1) {
+         // Re-parsing for controller's reactive map
+         try {
+           final jsonString = _remoteConfig.getString('v1_home_decor');
+           final map = jsonDecode(jsonString);
+           if (map['premium'] != null) premium.value = map['premium'];
+         } catch(_) {}
       }
-    });
+
+      // Handle Reels and Interior Json (Might be in big blob OR separate)
+      void updateLists(String key, RxList list) {
+         String jsonStr = RemoteConfigService.getString(key);
+         if (jsonStr.isEmpty) {
+           jsonStr = _remoteConfig.getString(key);
+           debugPrint('🔍 RemoteConfig: Fallback to top-level for [$key]. Result length: ${jsonStr.length}');
+         } else {
+           debugPrint('🔍 RemoteConfig: Found [$key] in main JSON blob. Result length: ${jsonStr.length}');
+         }
+         
+         if (jsonStr.isNotEmpty) {
+           try {
+             var decoded = jsonDecode(jsonStr);
+             debugPrint('🔥 RemoteConfig [$key] Decoded Type: ${decoded.runtimeType}');
+             
+             if (decoded is List) {
+               // Safely convert all elements to the required Type (String for reelsUrls)
+               final items = decoded.map((e) => e.toString()).toList();
+               list.assignAll(items);
+               debugPrint('✅ RemoteConfig: Updated list [$key] with ${items.length} items');
+             } else {
+               debugPrint('⚠️ RemoteConfig: Decoded JSON for [$key] is NOT a List! Raw: $decoded');
+             }
+           } catch (e) {
+             debugPrint('❌ RemoteConfig: Failed to decode list [$key]: $e');
+           }
+         } else {
+           debugPrint('⚠️ RemoteConfig: No content found for key [$key]');
+         }
+      }
+
+      updateLists("v1_home_decor_reels", reelsUrls);
+      updateLists("v1_home_decor_interior_json", interiorStyles);
+      
+      isInitialized.value = true;
+    } catch (e) {
+      debugPrint('❌ Error updating logic from config: $e');
+      isInitialized.value = true;
+    }
   }
+
+  // Compatibility layer for existing code
+  AdsVariableLegacy get adsVariable => AdsVariableLegacy(this);
 }
+
+class AdsVariableLegacy {
+  final RemoteConfigController _controller;
+  AdsVariableLegacy(this._controller);
+
+  AdsVariableLegacy get value => this; // Compatibility for .value access
+
+  List<String> get reelsUrls => _controller.reelsUrls;
+  List<dynamic> get interiorStyles => _controller.interiorStyles;
+  bool get isShowIAmTester => _controller.isShowIAmTester.value;
+}
+
+

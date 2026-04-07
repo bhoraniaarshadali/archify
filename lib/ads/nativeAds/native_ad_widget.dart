@@ -5,13 +5,16 @@ class NativeAdWidget extends StatelessWidget {
   final NativeAd nativeAd;
   final double height;
 
-  const NativeAdWidget({super.key, required this.nativeAd, this.height = 260});
+  const NativeAdWidget({super.key, required this.nativeAd, this.height = 450});
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: height,
-      child: AdWidget(ad: nativeAd),
+      child: AdWidget(
+        key: ObjectKey(nativeAd),
+        ad: nativeAd,
+      ),
     );
   }
 }

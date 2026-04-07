@@ -1,29 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart' hide AppState;
-import '../remote_config_service.dart';
 
 import '../app_state.dart';
 
 class NativeAdHelper extends ChangeNotifier {
+  final String Function() unitIdGetter;
+  NativeAdHelper({required this.unitIdGetter});
+
   NativeAd? nativeAd;
   bool isAdLoaded = false;
   bool isAdLoading = false;
   String? lastError;
 
   void loadAd(VoidCallback? onLoaded) {
-    if (isAdLoaded || nativeAd != null || isAdLoading) return;
-
-    final unitId = RemoteConfigService.getNativeAdId();
-    if (unitId.isEmpty) {
-      debugPrint(
-        '⚠️ NativeAdHelper: Ad Unit ID is empty. Check Remote Config.',
-      );
-      return;
+    if (isAdLoaded || nativeAd != null || isAdLoading) {
+       if (isAdLoaded && onLoaded != null) onLoaded();
+       return;
     }
 
-    if (!AppState.canLoadAds) {
-      debugPrint('⚠️ NativeAdHelper: canLoadAds is false. Check AppState.');
-      return;
+    final unitId = unitIdGetter();
+    if (unitId.isEmpty || unitId == "11") {
+      debugPrint('📢 NativeAdHelper: Loading skipped (ID disabled or empty)');
+      return; 
     }
 
     isAdLoading = true;
@@ -58,6 +56,25 @@ class NativeAdHelper extends ChangeNotifier {
     );
 
     nativeAd!.load();
+    notifyListeners();
+  }
+
+  /// 🔄 Safe Reload: Clears current ad and requests a new one for next impression
+  void reloadAd() {
+    debugPrint('🔄 NativeAdHelper: Reloading ad for next impression...');
+    // We don't call clearAd() immediately to avoid UI flickering if still visible,
+    // but in this 1-impression-per-visit strategy, we can safely clear and reload.
+    clearAd();
+    loadAd(null);
+  }
+
+  /// 🧹 Clear current ad to prepare for a new one without disposing the whole helper
+  void clearAd() {
+    nativeAd?.dispose();
+    nativeAd = null;
+    isAdLoaded = false;
+    isAdLoading = false;
+    lastError = null;
     notifyListeners();
   }
 
