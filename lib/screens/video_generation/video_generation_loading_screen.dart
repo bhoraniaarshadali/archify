@@ -10,6 +10,7 @@ class VideoGenerationLoadingScreen extends StatefulWidget {
   final String requestId;
   final String category;
   final int duration;
+  final int creditCost;
   final String? originalImageUrl;
 
   const VideoGenerationLoadingScreen({
@@ -17,6 +18,7 @@ class VideoGenerationLoadingScreen extends StatefulWidget {
     required this.requestId,
     required this.category,
     required this.duration,
+    this.creditCost = 1,
     this.originalImageUrl,
   });
 
@@ -71,6 +73,8 @@ class _VideoGenerationLoadingScreenState extends State<VideoGenerationLoadingScr
         if (update.status == GenerationStatus.success) {
           _onGenerationComplete(update.mediaUrl);
         } else if (update.status == GenerationStatus.failed) {
+          // Trigger refund
+          MyCreationsService.markAsRefunded(widget.requestId, "Generation Failed");
           if (mounted) {
             setState(() {
               _errorMessage = "Failed to generate video. Please try again.";
@@ -91,6 +95,7 @@ class _VideoGenerationLoadingScreenState extends State<VideoGenerationLoadingScr
       type: CreationType.video,
       category: cat,
       taskId: widget.requestId,
+      creditCost: widget.creditCost,
       originalMediaUrl: widget.originalImageUrl,
       metadata: {
         'duration': widget.duration,

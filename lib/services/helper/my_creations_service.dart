@@ -18,7 +18,6 @@ enum CreationCategory {
   exterior,
   garden,
   textToImage,
-  model3D,
   removeObject,
   replaceObject, 
   floorPlan,
@@ -33,7 +32,6 @@ extension CreationCategoryX on CreationCategory {
       case CreationCategory.exterior: return FeatureType.exterior;
       case CreationCategory.garden: return FeatureType.garden;
       case CreationCategory.textToImage: return FeatureType.imageGeneration;
-      case CreationCategory.model3D: return FeatureType.object2dTo3d;
       case CreationCategory.removeObject: return FeatureType.objectRemove;
       case CreationCategory.replaceObject: return FeatureType.objectReplace;
       case CreationCategory.floorPlan: return FeatureType.floorPlan;
@@ -58,6 +56,7 @@ class MyCreation {
   final String? taskId;
   final bool creditDeducted;
   final bool creditRefunded;
+  final int creditCost;
   final String? refundReason;
 
   MyCreation({
@@ -75,6 +74,7 @@ class MyCreation {
     this.taskId,
     this.creditDeducted = false,
     this.creditRefunded = false,
+    this.creditCost = 1,
     this.refundReason,
   });
 
@@ -93,6 +93,7 @@ class MyCreation {
     'taskId': taskId,
     'creditDeducted': creditDeducted,
     'creditRefunded': creditRefunded,
+    'creditCost': creditCost,
     'refundReason': refundReason,
   };
 
@@ -114,6 +115,7 @@ class MyCreation {
       taskId: json['taskId'] as String?,
       creditDeducted: json['creditDeducted'] as bool? ?? false,
       creditRefunded: json['creditRefunded'] as bool? ?? false,
+      creditCost: json['creditCost'] as int? ?? 1,
       refundReason: json['refundReason'] as String?,
     );
   }
@@ -160,6 +162,7 @@ class MyCreationsService {
         createdAt: timestamp,
         metadata: metadata,
         isDownloaded: true,
+        creditCost: metadata?['cost'] ?? 1,
       );
 
       // 3. Save to storage
@@ -211,6 +214,7 @@ class MyCreationsService {
     required CreationType type,
     required CreationCategory category,
     required String taskId,
+    int creditCost = 1,
     String? originalMediaUrl,
     Map<String, dynamic>? metadata,
   }) async {
@@ -229,6 +233,7 @@ class MyCreationsService {
         isDownloaded: false,
         creditDeducted: true, // Mark as deducted when initially processing successfully
         creditRefunded: false,
+        creditCost: creditCost,
       );
 
       await saveCreation(creation);
@@ -260,6 +265,7 @@ class MyCreationsService {
       taskId: old.taskId,
       creditDeducted: old.creditDeducted,
       creditRefunded: old.creditRefunded,
+      creditCost: old.creditCost,
       refundReason: old.refundReason,
     );
 
@@ -380,6 +386,7 @@ class MyCreationsService {
         taskId: old.taskId,
         creditDeducted: old.creditDeducted,
         creditRefunded: true,
+        creditCost: old.creditCost,
         refundReason: reason,
       );
 
@@ -390,8 +397,8 @@ class MyCreationsService {
       creationsChangeNotifier.value++;
 
       // Actually refund the credit
-      await DailyCreditManager.refundCredit(1);
-      debugPrint('💰 Credit Refunded for Task $taskId (Reason: $reason)');
+      await DailyCreditManager.refundCredit(old.creditCost);
+      debugPrint('💰 Credit Refunded for Task $taskId (Reason: $reason, Amount: ${old.creditCost})');
     } catch (e) {
       debugPrint('❌ Error marking as refunded: $e');
     }

@@ -9,9 +9,10 @@ import 'purchase_loading_screen.dart';
 import '../../services/credit_controller.dart';
 import '../../services/firebase_analytics_service.dart';
 import '../../services/remote_config_controller.dart';
-import '../../ads/remote_config_service.dart';
+
 import '../../utils/app_constant.dart';
 import '../../widgets/CustomPressButton.dart';
+import '../../utils/tester_workflow.dart';
 
 class ProScreen extends StatefulWidget {
   final String from;
@@ -81,24 +82,26 @@ class _ProScreenState extends State<ProScreen> {
   Future<void> callFirst() async {
     bool connected = await AdsVariable.isInternetConnected();
     if (connected) {
-      if (AdsVariable.isConfigured) {
-        fetchData();
-      } else {
-        // Just refresh config as a fallback
-        await RemoteConfigService.refresh();
-        fetchData();
-      }
+      // Always fetch regardless of isConfigured state — RevenueCat handles caching
+      await fetchData();
+    } else {
+      debugPrint("[ProScreen]: No internet connection. Cannot fetch offerings.");
+      if (mounted) setState(() => isLoading = false);
     }
   }
 
   Future<void> fetchData() async {
+    debugPrint("[ProScreen]: fetchData() called.");
     try {
       _offerings = await Purchases.getOfferings();
+      debugPrint("[ProScreen]: Offerings fetched. Current: ${_offerings?.current?.identifier}");
+      
       if (_offerings?.current != null) {
         availablePackages = {
           for (var package in _offerings!.current!.availablePackages)
             package.storeProduct.identifier: package,
         };
+        debugPrint("[ProScreen]: Available packages: ${availablePackages?.keys.toList()}");
 
         firstCoinPackage = _getPackageById(AppConstant.firstCoinIdentifier);
         secondCoinPackage = _getPackageById(AppConstant.secondCoinIdentifier);
@@ -110,17 +113,21 @@ class _ProScreenState extends State<ProScreen> {
         weeklyPackage = _getPackageById(AppConstant.weeklyIdentifier);
         yearlyPackage = _getPackageById(AppConstant.yearlyIdentifier);
 
+        debugPrint("[ProScreen]: Weekly: $weeklyPackage, Yearly: $yearlyPackage");
+
         // Set default selected packages
         selectedCreditPackage = _getPackageById(AdsVariable.selectedCreditPlan);
         selectedPremiumPackage = _getPackageById(AdsVariable.selectedPremiumPlan);
         
-        setState(() {
-          isLoading = false;
-        });
+        if (mounted) setState(() => isLoading = false);
+      } else {
+        // current offering is null — show UI without packages
+        debugPrint("[ProScreen]: ⚠️ _offerings.current is NULL! No packages to show.");
+        if (mounted) setState(() => isLoading = false);
       }
     } catch (e) {
-      debugPrint("ERROR fetchData: $e");
-      setState(() => isLoading = false);
+      debugPrint("[ProScreen]: ❌ ERROR fetchData: $e");
+      if (mounted) setState(() => isLoading = false);
     }
   }
 
@@ -306,16 +313,90 @@ class _ProScreenState extends State<ProScreen> {
   Widget _buildTopSection() {
     return Stack(
       children: [
+        // Premium gradient background (replaces missing asset)
         Container(
           height: MediaQuery.of(context).size.height * 0.45,
           width: double.infinity,
           decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/pro/pro_video_credit.webp'),
-              fit: BoxFit.cover,
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF1A0033),
+                Color(0xFF3D0B72),
+                Color(0xFF6A1FA0),
+                Color(0xFF3D0B72),
+              ],
+              stops: [0.0, 0.35, 0.7, 1.0],
             ),
           ),
+          child: Stack(
+            children: [
+              // Decorative circles for depth
+              Positioned(
+                top: -40,
+                right: -40,
+                child: Container(
+                  width: 200,
+                  height: 200,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.deepPurpleAccent.withOpacity(0.2),
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: 20,
+                left: -30,
+                child: Container(
+                  width: 150,
+                  height: 150,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.purple.withOpacity(0.15),
+                  ),
+                ),
+              ),
+              // Center icon
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 60),
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withOpacity(0.08),
+                        border: Border.all(color: Colors.white.withOpacity(0.15)),
+                      ),
+                      child: const Icon(Icons.auto_awesome_rounded, size: 52, color: Colors.amber),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Archify Pro',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Unlock unlimited AI power',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.65),
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
+        // Bottom fade overlay
         Positioned.fill(
           child: Container(
             decoration: BoxDecoration(
@@ -598,9 +679,38 @@ class _ProScreenState extends State<ProScreen> {
                 ),
               ),
             ),
-            if (AdsVariable.isShowIAmTester) ...[
+            if (AdsVariable.isShowIAmTester && widget.isFromInsufficientCoins) ...[
               const SizedBox(height: 12),
-              _testerButton(),
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  debugPrint("Tester button tapped");
+                  debugPrint(
+                      "Email: ${AdsVariable.testEmail}, Pass: ${AdsVariable.testPassword}");
+                  TesterWorkflow.show(
+                    context,
+                    onSuccess: () async {
+                      // Success logic (bypass is activated in DailyCreditManager)
+                    },
+                  );
+                },
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                        color: Colors.deepPurpleAccent.withOpacity(0.5)),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    'I am Tester',
+                    style: GoogleFonts.poppins(
+                        color: Colors.deepPurpleAccent,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
             ],
             const SizedBox(height: 16),
             Row(
@@ -624,89 +734,4 @@ class _ProScreenState extends State<ProScreen> {
     );
   }
 
-  Widget _testerButton() {
-    return GestureDetector(
-      onTap: _showTesterLoginDialog,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.deepPurpleAccent.withOpacity(0.5)),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          'I am Tester',
-          style: GoogleFonts.poppins(color: Colors.deepPurpleAccent, fontSize: 12, fontWeight: FontWeight.w600),
-        ),
-      ),
-    );
-  }
-
-  void _showTesterLoginDialog() {
-    final emailController = TextEditingController();
-    final passController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A1A),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text('Tester Login', style: GoogleFonts.poppins(color: Colors.white)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: emailController,
-              style: const TextStyle(color: Colors.white),
-              decoration: const InputDecoration(
-                labelText: 'Tester ID',
-                labelStyle: TextStyle(color: Colors.white60),
-                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: passController,
-              obscureText: true,
-              style: const TextStyle(color: Colors.white),
-              decoration: const InputDecoration(
-                labelText: 'Password',
-                labelStyle: TextStyle(color: Colors.white60),
-                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: Colors.white60)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurpleAccent),
-            onPressed: () async {
-              String enteredEmail = emailController.text.trim();
-              String enteredPass = passController.text.trim();
-
-              if (enteredEmail == AdsVariable.testEmail && enteredPass == AdsVariable.testPassword) {
-                Navigator.pop(context);
-                purchaseLoadingScreen.show();
-                
-                // Grant temporary premium status for the session
-                final creditController = CreditController.to;
-                await creditController.updatePremiumStatus(true, addCoins: 100, plan: "Tester Bypass");
-                
-                purchaseLoadingScreen.hide();
-                if (mounted) Navigator.pop(context, true); // Return true to indicate success
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Invalid Tester Credentials')),
-                );
-              }
-            },
-            child: const Text('Login'),
-          ),
-        ],
-      ),
-    );
-  }
 }

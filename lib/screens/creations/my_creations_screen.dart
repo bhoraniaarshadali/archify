@@ -25,7 +25,6 @@ class _MyCreationsScreenState extends State<MyCreationsScreen> {
     'Interior',
     'Exterior',
     'Garden',
-    '3D Model',
     'Text-to-Image',
     'Floor Plan',
     'Custom',
@@ -80,7 +79,6 @@ class _MyCreationsScreenState extends State<MyCreationsScreen> {
       'Interior': 'interior',
       'Exterior': 'exterior',
       'Garden': 'garden',
-      '3D Model': 'model3D',
       'Text-to-Image': 'textToImage',
       'Floor Plan': 'floorPlan',
       'Custom': 'custom',
@@ -423,8 +421,6 @@ class _MyCreationsScreenState extends State<MyCreationsScreen> {
 
   String _getCategoryLabel(CreationCategory category) {
     switch (category) {
-      case CreationCategory.model3D:
-        return '3D MODEL';
       case CreationCategory.textToImage:
         return 'AI ART';
       case CreationCategory.removeObject:

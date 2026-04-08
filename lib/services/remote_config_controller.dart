@@ -45,12 +45,12 @@ class AdsVariable {
 
   static String? get testEmail {
     final email = RemoteConfigController.to.testEmail.value;
-    return email != "1" && email.isNotEmpty ? email : null;
+    return email.isNotEmpty ? email : null;
   }
 
   static String? get testPassword {
     final pass = RemoteConfigController.to.testPassword.value;
-    return pass != "1" && pass.isNotEmpty ? pass : null;
+    return pass.isNotEmpty ? pass : null;
   }
 
   static String get weeklyBonusCredit =>
@@ -125,8 +125,16 @@ class RemoteConfigController extends GetxController {
       isShowIAmTester.value = RemoteConfigService.getString("isShowIAmTester") == "true" || _remoteConfig.getBool("isShowIAmTester");
       selectedCreditPlanId.value = RemoteConfigService.getString("selectedCreditPlan");
       selectedPremiumPlanId.value = RemoteConfigService.getString("selectedPremiumPlan");
-      testEmail.value = RemoteConfigService.getString("testEmail");
-      testPassword.value = RemoteConfigService.getString("testPassword");
+      // Support both camelCase and snake_case for flexibility
+      testEmail.value = RemoteConfigService.getString("testEmail").isNotEmpty 
+          ? RemoteConfigService.getString("testEmail") 
+          : RemoteConfigService.getString("test_email");
+          
+      testPassword.value = RemoteConfigService.getString("testPassword").isNotEmpty 
+          ? RemoteConfigService.getString("testPassword") 
+          : RemoteConfigService.getString("test_password");
+
+      debugPrint('🔥 RemoteConfig Login: Current email from config is "${testEmail.value}"');
 
       // 🔍 Debug log for the source of the main blob
       final blobVal = _remoteConfig.getValue('v1_home_decor');

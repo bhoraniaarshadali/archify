@@ -21,7 +21,7 @@ class NativeAdHelper extends ChangeNotifier {
     final unitId = unitIdGetter();
     if (unitId.isEmpty || unitId == "11") {
       debugPrint('📢 NativeAdHelper: Loading skipped (ID disabled or empty)');
-      return; 
+      return;
     }
 
     isAdLoading = true;

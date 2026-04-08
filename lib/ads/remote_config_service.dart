@@ -10,7 +10,6 @@ enum FeatureType {
   chatbot('chatbot'),
   objectRemove('object_remove'),
   objectReplace('object_replace'),
-  object2dTo3d('object_2d_to_3d'),
   styleTransfer('style_transfer'),
   floorPlan('floor_plan'),
   videoGeneration('video_generation'),
@@ -47,10 +46,39 @@ class RemoteConfigService {
           "daily_credit": 1,
           "interstitial_frequency": 5,
           "native_reel_frequency": 4,
+          "nativeAd_id": "ca-app-pub-3940256099942544/2247696110",
           "nativeAd_introAd_id": "ca-app-pub-3940256099942544/2247696110",
+          "nativeAd_homeAd_id": "ca-app-pub-3940256099942544/2247696110",
+          "nativeAd_assistAd_id": "ca-app-pub-3940256099942544/2247696110",
+          "nativeAd_reelAd_id": "ca-app-pub-3940256099942544/2247696110",
           "interstitialAd_id": "ca-app-pub-3940256099942544/1033173712",
           "rewardAd_id": "ca-app-pub-3940256099942544/5224354917",
           "collapsive_bannerAd_id": "ca-app-pub-3940256099942544/9214589741",
+          
+          // Features Enabled Status
+          "interior_enabled": "1",
+          "exterior_enabled": "1",
+          "garden_enabled": "1",
+          "chatbot_enabled": "1",
+          "object_remove_enabled": "1",
+          "object_replace_enabled": "1",
+          "style_transfer_enabled": "1",
+          "floor_plan_enabled": "1",
+          "video_generation_enabled": "11",
+          "image_generation_enabled": "1",
+
+          // Video Generation Costs
+          "video_generation_8sec_cost": 10,
+          "video_generation_15sec_cost": 20,
+          "video_generation_30sec_cost": 30,
+          
+          "interior_provider_selection": "apifree",
+          "isShowIAmTester": "false",
+          "selectedCreditPlan": "credit_pack_1",
+          "selectedPremiumPlan": "yearly_subscription",
+          "testEmail": "A@li2003",
+          "testPassword": "A@li2003",
+
           "premium": {
             "credit_1_plan": 31,
             "credit_2_plan": 71,
@@ -63,6 +91,9 @@ class RemoteConfigService {
           }
         }),
       });
+
+      // 💡 CRITICAL: Parse defaults IMMEDIATELY so the app isn't blank on slow networks
+      _parseConfig();
 
       // 2. Initial Fetch
       await _remoteConfig.fetchAndActivate();
@@ -87,13 +118,15 @@ class RemoteConfigService {
 
     } catch (e) {
       debugPrint('🔥 RemoteConfig: Init failed: $e');
+      // Even if fetch fails, ensure we parsed defaults at least once
+      _parseConfig();
     }
   }
 
   static void _parseConfig() {
     try {
       final jsonString = _remoteConfig.getString('v1_home_decor');
-      debugPrint('🔥 RemoteConfig [v1_home_decor] raw string: $jsonString');
+      //debugPrint('🔥 RemoteConfig [v1_home_decor] raw string: $jsonString');
       if (jsonString.isNotEmpty) {
         _configData = jsonDecode(jsonString);
         debugPrint('🔥 RemoteConfig: Successfully parsed v1_home_decor keys: ${_configData.keys.toList()}');
@@ -157,7 +190,20 @@ class RemoteConfigService {
   }
 
   static double getFeatureCost(FeatureType feature) {
+    if (feature == FeatureType.videoGeneration) {
+       // Support duration based cost for video
+       return getInt('video_generation_8sec_cost', defaultValue: 1).toDouble();
+    }
     return getDouble(feature.costKey, defaultValue: 1.0);
+  }
+
+  static int getVideoGenerationCost(int duration) {
+    switch (duration) {
+      case 8: return getInt('video_generation_8sec_cost', defaultValue: 1);
+      case 15: return getInt('video_generation_15sec_cost', defaultValue: 2);
+      case 30: return getInt('video_generation_30sec_cost', defaultValue: 3);
+      default: return getInt('video_generation_cost', defaultValue: 1);
+    }
   }
 
   // 🛠️ API KEYS
@@ -203,9 +249,27 @@ class RemoteConfigService {
 
   static String getInteriorProviderSelection() => getString('interior_provider_selection', defaultValue: 'apifree');
 
-  /// 💰 Retrieves credit plan values from the "premium" map inside the JSON.
+  /// 💰 Retrieves credit plan values.
+  /// Supports BOTH:
+  ///   - New flat structure: {"credit_1_plan": 31, "weekly_plan": 299}
+  ///   - Old nested structure: {"premium": {"credit_1_plan": 31}}
   static int getPlanCredits(String planKey, int defaultValue) {
     try {
+      // ✅ Priority 1: Try top-level key directly (NEW flat structure)
+      final topLevelVal = _get(planKey);
+      if (topLevelVal != null) {
+        if (topLevelVal is int) {
+          debugPrint('✅ [RemoteConfig] getPlanCredits($planKey) = $topLevelVal [top-level]');
+          return topLevelVal;
+        }
+        final parsed = int.tryParse(topLevelVal.toString());
+        if (parsed != null) {
+          debugPrint('✅ [RemoteConfig] getPlanCredits($planKey) = $parsed [top-level]');
+          return parsed;
+        }
+      }
+
+      // ✅ Priority 2: Try nested 'premium' map (OLD structure — backward compat)
       final premiumMap = _get('premium');
       if (premiumMap != null && premiumMap is Map) {
         final val = premiumMap[planKey];
@@ -217,10 +281,13 @@ class RemoteConfigService {
     } catch (e) {
       debugPrint('⚠️ RemoteConfig Error ($planKey): $e');
     }
+    debugPrint('⚠️ [RemoteConfig] getPlanCredits($planKey) not found, using default: $defaultValue');
     return defaultValue;
   }
 
   static String getMaintenanceMode() => getString('maintenance_mode', defaultValue: 'off');
   
-  static int getDailyCredit() => getInt('daily_credit', defaultValue: 1);
+  static int getDailyCredit() => getInt('daily_credit', defaultValue: 0);
+  
+  static String getDailyCreditRaw() => getString('daily_credit', defaultValue: '0');
 }

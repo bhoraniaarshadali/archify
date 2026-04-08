@@ -7,7 +7,8 @@ import '../../services/ApiFreeUse/video_generation_service.dart';
 import 'video_generation_loading_screen.dart';
 import '../../widgets/primary_generate_button.dart';
 import '../../ads/app_state.dart';
-import '../premium/pro_screen.dart';
+import '../../ads/remote_config_service.dart';
+import '../../services/daily_credit_manager.dart';
 
 class VideoGenerationScreen extends StatefulWidget {
   final String? initialImageUrl;
@@ -25,7 +26,7 @@ class VideoGenerationScreen extends StatefulWidget {
 
 class _VideoGenerationScreenState extends State<VideoGenerationScreen> {
   String? _selectedCategory;
-  int _selectedDuration = 8;
+  int _selectedDuration = 15;
   File? _selectedFile;
   String? _imageUrl;
   bool _isGenerating = false;
@@ -68,16 +69,7 @@ class _VideoGenerationScreenState extends State<VideoGenerationScreen> {
   Future<void> _handleGenerate() async {
     if (_isGenerating) return;
 
-    // 1. Premium & Credit Check
-    if (!AppState.isPremiumUser) {
-      final success = await Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const ProScreen(from: 'video_generation', isFromInsufficientCoins: true)),
-      );
-      if (success != true) return;
-    }
-
-    // 2. Validation
+    // 1. Validation
     if (_selectedCategory == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select a category')),
@@ -90,6 +82,14 @@ class _VideoGenerationScreenState extends State<VideoGenerationScreen> {
         const SnackBar(content: Text('Please select or upload an image')),
       );
       return;
+    }
+
+    final int cost = RemoteConfigService.getVideoGenerationCost(_selectedDuration);
+
+    // 2. Premium & Credit Check
+    if (!AppState.isPremiumUser) {
+      final canProceed = await DailyCreditManager.checkCreditOnly(context, amount: cost);
+      if (!canProceed) return;
     }
 
     setState(() => _isGenerating = true);
@@ -107,7 +107,15 @@ class _VideoGenerationScreenState extends State<VideoGenerationScreen> {
         throw Exception('Failed to upload image. Please check your connection.');
       }
 
-      // 4. Submit Video Request
+      // 4. Consume Credits
+      if (!AppState.isPremiumUser) {
+        final success = await DailyCreditManager.useCredits(cost);
+        if (!success) {
+          throw Exception('Insufficient credits.');
+        }
+      }
+
+      // 5. Submit Video Request
       final requestId = await VideoGenerationService.submitVideoRequest(
         imageUrl: finalImageUrl,
         category: _selectedCategory!,
@@ -116,13 +124,14 @@ class _VideoGenerationScreenState extends State<VideoGenerationScreen> {
       );
 
       if (requestId != null && mounted) {
-        // 5. Navigate to Loading Screen
+        // 6. Navigate to Loading Screen
         AppNavigator.pushReplacement(
           context,
           VideoGenerationLoadingScreen(
             requestId: requestId,
             category: _selectedCategory!,
             duration: _selectedDuration,
+            creditCost: cost, // Pass the cost
             originalImageUrl: finalImageUrl,
           ),
         );
@@ -284,7 +293,7 @@ class _VideoGenerationScreenState extends State<VideoGenerationScreen> {
             const SizedBox(height: 40),
 
             PrimaryGenerateButton(
-              title: 'Generate Video',
+              title: 'Generate Video (${RemoteConfigService.getVideoGenerationCost(_selectedDuration)} Credits)',
               isGenerating: _isGenerating,
               onTap: _isGenerating ? null : _handleGenerate,
             ),

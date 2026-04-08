@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import '../ads/remote_config_service.dart';
+import '../utils/network_time_utils.dart';
 
 class CreditController extends GetxController {
   static CreditController get to => Get.find<CreditController>();
@@ -48,40 +49,62 @@ class CreditController extends GetxController {
 
   /// 🔄 DAILY CREDIT: Only for Non-Premium users
   Future<void> checkAndResetDailyCredit() async {
+    log("---------------- [DailyCredit Check] ----------------");
+    
+    // 1. Premium users get NO daily credits
     if (isPremium.value) {
-      log("[DailyCredit]: User is Premium. Skipping Daily Credit.");
+      log("ℹ️ [DailyCredit]: User is PREMIUM. Skipping daily credit allocation.");
+      return;
+    }
+
+    // 2. Check Remote Config if system is "off"
+    final String configValue = RemoteConfigService.getDailyCreditRaw();
+    log("ℹ️ [DailyCredit]: Remote Config Value = '$configValue'");
+    
+    if (configValue.toLowerCase() == "off") {
+      log("🚫 [DailyCredit]: System is 'OFF' via Remote Config. No one gets daily credits.");
       return;
     }
 
     try {
-      final now = DateTime.now();
+      // 3. Get Reliable Network Time to prevent device time cheating
+      final now = await NetworkTimeUtils.getNetworkTime();
+      
       String? lastResetStr = await _storage.read(key: _lastResetKey);
       
       if (lastResetStr == null) {
+        log("✅ [DailyCredit]: First time user detected. Allocating initial credits.");
         await _performDailyReset(now);
         return;
       }
 
       final lastReset = DateTime.parse(lastResetStr);
-      if (now.difference(lastReset).inHours >= 24) {
+      final difference = now.difference(lastReset);
+
+      // 4. Strict 24-hour gap
+      if (difference.inHours >= 24) {
+        log("✅ [DailyCredit]: 24 hours passed since last reset ($lastReset). Allocating new credits.");
         await _performDailyReset(now);
       } else {
-        log("[DailyCredit]: Already reset within 24h. Remaining: ${userCoins.value}");
+        int remainingHours = 24 - difference.inHours;
+        log("⏳ [DailyCredit]: Already received today. Next allocation in ~$remainingHours hours.");
       }
     } catch (e) {
-      log("[DailyCredit] Error checking reset: $e");
+      log("❌ [DailyCredit]: Error during check: $e");
     }
+    log("-----------------------------------------------------");
   }
 
   Future<void> _performDailyReset(DateTime now) async {
-    // 🪙 Logic: Reset per Remote Config (don't stack)
     final int dailyAllotment = RemoteConfigService.getDailyCredit(); 
+    
+    // Setting value directly ensures it doesn't accumulate
     userCoins.value = dailyAllotment;
     
     await _storage.write(key: _coinKey, value: userCoins.value.toString());
     await _storage.write(key: _lastResetKey, value: now.toIso8601String());
     
-    log("[DailyCredit]: Reset to $dailyAllotment credits.");
+    log("💰 [DailyCredit]: SUCCESS! reset to $dailyAllotment credits at $now.");
     update(['premium_status']);
   }
 
@@ -114,16 +137,24 @@ class CreditController extends GetxController {
   // Alias for backward compatibility
   Future<void> addCoins(int amount) => addCredits(amount);
 
-  /// ➕ Purchase Success
+  /// 💎 Set as Premium and add optional coins
   Future<void> updatePremiumStatus(bool status, {int? addCoins, String? plan}) async {
     isPremium.value = status;
-    if (addCoins != null) userCoins.value += addCoins;
+    
+    // When becoming premium, daily credits stop automatically because 
+    // checkAndResetDailyCredit returns early if isPremium is true.
+    
+    if (addCoins != null) {
+      userCoins.value += addCoins;
+    }
+    
     activePlan.value = plan ?? "";
 
     await _storage.write(key: _premiumKey, value: status.toString());
     await _storage.write(key: _coinKey, value: userCoins.value.toString());
     if (plan != null) await _storage.write(key: _activePlanKey, value: plan);
     
+    log("[CreditController]: Updated Premium Status: $status, Plan: ${activePlan.value}, Total Coins: ${userCoins.value}");
     update(['premium_status']);
   }
 

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
-import 'package:logger/logger.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -44,7 +43,6 @@ class ResultScreen extends StatefulWidget {
 }
 
 class _ResultScreenState extends State<ResultScreen> {
-  final Logger _logger = Logger();
   double _sliderValue = 0.5; // Slider position (0.0 to 1.0)
   bool _isSaving = false;
 
@@ -52,22 +50,6 @@ class _ResultScreenState extends State<ResultScreen> {
   void initState() {
     super.initState();
     // Saving is now handled in the loading screen before navigation.
-  }
-
-  CreationCategory _determineCategory() {
-    final style = widget.styleName?.toLowerCase() ?? '';
-    final building = widget.buildingType?.toLowerCase() ?? '';
-
-    if (building.contains('floor') || building.contains('blueprint')) return CreationCategory.floorPlan;
-    if (building.contains('3d') || building.contains('model')) return CreationCategory.model3D;
-    if (building.contains('garden')) return CreationCategory.garden;
-    if (building.contains('interior') || building.contains('kitchen') || building.contains('room')) return CreationCategory.interior;
-    if (building.contains('exterior') || building.contains('house')) return CreationCategory.exterior;
-    if (style.contains('removal')) return CreationCategory.removeObject;
-    if (style.contains('replace')) return CreationCategory.replaceObject;
-    if (style.contains('text to image') || style.contains('ai art')) return CreationCategory.textToImage;
-
-    return CreationCategory.exterior;
   }
 
   // --- Logic Functions (Unchanged) ---

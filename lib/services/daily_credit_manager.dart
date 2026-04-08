@@ -14,8 +14,15 @@ class DailyCreditManager {
     await CreditController.to.checkAndResetDailyCredit();
   }
 
-  static Future<void> useCredits(int amount) async {
-    await CreditController.to.consumeCredit(amount: amount);
+  static bool _testerBypassActive = false;
+
+  static Future<bool> useCredits(int amount) async {
+    if (_testerBypassActive) {
+      _testerBypassActive = false;
+      debugPrint("🛠️ Tester Bypass: Skipping credit consumption for this call.");
+      return true;
+    }
+    return await CreditController.to.consumeCredit(amount: amount);
   }
 
   static Future<void> addCredits(int amount) async {
@@ -26,25 +33,38 @@ class DailyCreditManager {
     await CreditController.to.refundCredit(amount);
   }
 
-  static Future<bool> checkCreditOnly(BuildContext context) async {
-    // 1. If we have credits, proceed immediately
-    if (getRemainingCredit() > 0) return true;
+  static Future<bool> checkCreditOnly(BuildContext context, {int amount = 1}) async {
+    // 1. If we have enough credits, proceed immediately
+    if (getRemainingCredit() >= amount) return true;
 
-    // 2. No credits -> Redirect to Pro Screen for purchase or Tester Login
+    // 2. Not enough credits -> Redirect to Pro Screen
     final success = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => const ProScreen(
-          from: 'insufficient_coins', 
-          isFromInsufficientCoins: true
+            from: 'insufficient_coins',
+            isFromInsufficientCoins: true,
+            initialTabIndex: 0
         ),
       ),
     );
 
-    return success == true;
+    // If returning from ProScreen with success (e.g. valid Tester login or successful purchase)
+    if (success == true) {
+      if (getRemainingCredit() < amount) {
+        _testerBypassActive = true; // Enable bypass for the next useCredits call
+      }
+      return true;
+    }
+
+    return false;
   }
 
   static Future<bool> consumeCredit() async {
+    if (_testerBypassActive) {
+      _testerBypassActive = false;
+      return true;
+    }
     return await CreditController.to.consumeCredit();
   }
 

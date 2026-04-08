@@ -208,8 +208,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed && !widget.firebaseError) {
-      debugPrint('📱 App Resumed: Checking for pending tasks...');
+      debugPrint('📱 App Resumed: Checking for pending tasks & daily credits...');
       BackgroundTaskService.instance.resumeTasks();
+      CreditController.to.checkAndResetDailyCredit();
     }
   }
 
